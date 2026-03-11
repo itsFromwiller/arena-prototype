@@ -7,7 +7,15 @@
 /[Tt]emp/
 /[Oo]bj/
 /[Bb]uild/
-/[Bb]uilds/
+
+# Three steps to ignore the builds folder, but keep the builds/WebGL folder:
+# 1. Ignore all contents inside any "Builds" or "builds" folder
+/[Bb]uilds/*
+# 2. Allow the "WebGL" folder itself (must be allowed first)
+!/[Bb]uilds/WebGL/
+# 3. Also track contents of the WebGL folder
+!/[Bb]uilds/WebGL/**
+
 /[Ll]ogs/
 /[Uu]ser[Ss]ettings/
 *.log
