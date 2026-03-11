@@ -1,0 +1,636 @@
+using Arena.Dungeon;
+using Arena.Enemies;
+using Arena.Items;
+using Arena.Loot;
+using Arena.Player;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
+using System.Text;
+
+namespace Arena.Combat
+{
+    public class CombatSystem : MonoBehaviour
+    {
+        public static CombatSystem Instance;
+
+        public GameObject CombatView;
+        public CombatLogView CombatLogView;
+        public SelectionView CombatSelectionView;
+        public GameObject CombatActionsView;
+        public GameObject AfterCombatActionsView;
+        public GameObject SummaryView;
+        public GameObject LevelUpView;
+        public TextMeshProUGUI ResultText;
+        public TextMeshProUGUI SummaryText;
+        public TextMeshProUGUI StatPointsRemainingText;
+        public GameObject AfterCombatSkillButton;
+        public GameObject AfterCombatItemButton;
+        public GameObject AfterCombatContinueButton;
+        public CombatStatsView EnemyCombatStatsView;
+        public CombatStatsView PlayerCombatStatsView;
+        public PlayerStatsView PlayerStatsView;
+
+        private CombatContext CombatContext = new CombatContext();
+
+        private List<SkillDataSlot> CurrentSkills = new List<SkillDataSlot>();
+        private List<ItemDataSlot> CurrentUsableItems = new List<ItemDataSlot>();
+        private bool hasLeftBattle = false;
+        private int totalEarnedXP = 0;
+        private int totalEarnedGold = 0;
+        private List<LootResult> lootEarned = new List<LootResult>();
+
+        public enum CombatSummary
+        {
+            Victory,
+            Defeat,
+            Escaped
+        }
+
+        private void Awake()
+        {
+            Instance = this;
+            CombatView.SafeSetActive(false);
+
+            CombatLogView.gameObject.SafeSetActive(false);
+            CombatSelectionView.gameObject.SafeSetActive(false);
+            CombatActionsView.SafeSetActive(false);
+            AfterCombatActionsView.SafeSetActive(false);
+            SummaryView.SafeSetActive(false);
+            LevelUpView.SafeSetActive(false);
+            EnemyCombatStatsView.gameObject.SafeSetActive(false);
+            PlayerCombatStatsView.gameObject.SafeSetActive(false);
+        }
+
+        private void OnEnable()
+        {
+            GameEvents.OnEnemySpawned += HandleEnemySpawned;
+            GameEvents.OnEnterCombat += HandleEnterCombat;
+            GameEvents.OnStartCombat += HandleStartCombat;
+            GameEvents.OnEnterDungeon += HandleEnterDungeon;
+            GameEvents.OnFinishDungeon += HandleFinishDungeon;
+        }
+
+        private void OnDisable()
+        {
+            GameEvents.OnEnemySpawned -= HandleEnemySpawned;
+            GameEvents.OnEnterCombat -= HandleEnterCombat;
+            GameEvents.OnStartCombat -= HandleStartCombat;
+            GameEvents.OnEnterDungeon -= HandleEnterDungeon;
+            GameEvents.OnFinishDungeon -= HandleFinishDungeon;
+        }
+
+        public void HandleEnterDungeon(string dungeonName)
+        {
+            totalEarnedXP = 0;
+            totalEarnedGold = 0;
+            lootEarned.Clear();
+
+            CombatLogView.gameObject.SafeSetActive(false);
+            CombatLogView.ClearLog();
+            CombatSelectionView.gameObject.SafeSetActive(false);
+            CombatActionsView.SafeSetActive(false);
+            AfterCombatActionsView.SafeSetActive(false);
+            SummaryView.SafeSetActive(false);
+            LevelUpView.SafeSetActive(false);
+            EnemyCombatStatsView.gameObject.SafeSetActive(false);
+            PlayerCombatStatsView.gameObject.SafeSetActive(false);
+        }
+
+        void HandleEnemySpawned(EnemyEntity enemyEntity)
+        {
+            CombatContext.Enemy = enemyEntity;
+            CombatContext.Player = PlayerSystem.Instance.Player;
+            CombatContext.DamageDealt = 0;
+            CombatContext.HealingAmount = 0;
+        }
+
+        void HandleEnterCombat()
+        {
+            CombatView.SafeSetActive(true);
+            EnemyCombatStatsView.gameObject.SafeSetActive(true);
+            PlayerCombatStatsView.gameObject.SafeSetActive(true);
+            CombatLogView.gameObject.SafeSetActive(true);
+            CombatActionsView.SafeSetActive(true);
+            //            CombatView.SafeSetActive(true);
+            //            SummaryView.SafeSetActive(false);
+            hasLeftBattle = false;
+        }
+
+        void HandleStartCombat()
+        {
+//            CombatActionsView.SafeSetActive(true);
+//            AfterCombatActionsView.SafeSetActive(false);
+//            CombatSelectionView.gameObject.SafeSetActive(false);
+//            SummaryView.SafeSetActive(false);
+//            CombatLogView.gameObject.SafeSetActive(true);
+
+            if (CombatContext.Enemy.GetInitiative() > CombatContext.Player.GetInitiative())
+            {
+                GameEvents.EnemyGotInitiative(CombatContext.Enemy);
+                ProcessEnemyTurn();
+            }
+        }
+
+        public void HandleFinishDungeon()
+        {
+            CombatView.SafeSetActive(false);
+        }
+
+        private void ProcessStartOfPlayerTurn()
+        {
+            CombatLogView.gameObject.SafeSetActive(true);
+            CombatSelectionView.gameObject.SafeSetActive(false);
+            ResetContextForNewTurn();
+        }
+
+        public void ProcessPlayerAttack()
+        {
+            ProcessStartOfPlayerTurn();
+
+            if (CombatContext.Player.DidAttackSuccessfully())
+            {
+                CombatContext.Player.AttackTarget(CombatContext.Enemy, CombatContext);
+            }
+            else
+            {
+                GameEvents.PlayerMissed(CombatContext);
+            }
+
+            ProcessEndOfPlayerTurn();
+        }
+
+        public void ShowSkillList()
+        {
+            if (CurrentSkills.Count == 0)
+            {
+                CurrentSkills = CombatContext.Player.GetCurrentSkills();
+            }
+            CombatSelectionView.SetupSkillDataView(CurrentSkills, CombatContext.Player.MP, SkillSelectionItemView.ActionType.Cast);
+            
+            CombatSelectionView.gameObject.SafeSetActive(true);
+            CombatLogView.gameObject.SafeSetActive(false);
+        }
+
+        public void ProcessPlayerSkill(SkillDataSlot skillDataSlot)
+        {
+            ProcessStartOfPlayerTurn();
+
+            skillDataSlot.UseCount++;
+            ProcessSkillForSource(CombatContext.Player, CombatContext.Enemy, skillDataSlot.SkillData);
+
+            if (hasLeftBattle)
+            {
+                return;
+            }
+
+            ProcessEndOfPlayerTurn();
+        }
+
+        public void ProcessSkillForSource(CombatEntity source, CombatEntity enemy, SkillData skillData)
+        {
+            CombatContext.SkillUsed = skillData;
+            if (source.DidUseSkillSuccessfully(CombatContext))
+            {
+                source.UseSkill(CombatContext);
+                ProcessSkill(source, enemy, skillData);
+            }
+        }
+
+        public void ProcessSkill(CombatEntity source, CombatEntity enemy, SkillData skillData)
+        {
+            switch (skillData.SkillType)
+            {
+                case SkillType.EscapeDungeon:
+                {
+                    PlayerEscaped();
+                    return;
+                }
+                case SkillType.DealDamage:
+                case SkillType.DealMDamage:
+                {
+                    source.AttackTargetWithSkill(enemy, skillData, CombatContext);
+                    break;
+                }
+                case SkillType.Heal:
+                {
+                    if (skillData.SkillValue > 0)
+                    {
+                        CombatContext.HealingAmount = skillData.SkillValue;
+                    }
+                    else
+                    {
+                        CombatContext.HealingAmount = (int)(skillData.SkillPercentage * CombatContext.Player.MaxHP);
+                    }
+                    source.Heal(CombatContext);
+                    break;
+                }
+            }
+        }
+
+        public void ShowItemList()
+        {
+            CurrentUsableItems = CombatContext.Player.GetCurrentItems(true, false);
+            CombatSelectionView.SetupItemDataView(CurrentUsableItems, ItemSelectionItemView.ActionType.Use, true);
+
+            CombatSelectionView.gameObject.SafeSetActive(true);
+            CombatLogView.gameObject.SafeSetActive(false);
+        }
+
+        public void ProcessPlayerItem(ItemDataSlot itemDataSlot)
+        {
+            ProcessStartOfPlayerTurn();
+
+            CombatContext.ItemUsed = itemDataSlot.ItemData;
+            CombatContext.Player.UseItem(itemDataSlot.ItemData.Name, 1);
+            switch (CombatContext.ItemUsed.ActionType)
+            {
+                case ActionType.Escape:
+                {
+                    PlayerEscaped();
+                    return;
+                }
+                case ActionType.DamageHP:
+                {
+                    CombatContext.Player.AttackTargetWithItem(CombatContext.Enemy, itemDataSlot.ItemData, CombatContext);
+                    break;
+                }
+                case ActionType.HealHP:
+                {
+                    int.TryParse(CombatContext.ItemUsed.ActionValue, out CombatContext.HealingAmount);
+                    CombatContext.Player.Heal(CombatContext);
+                    break;
+                }
+                case ActionType.RestoreMP:
+                {
+                    int.TryParse(CombatContext.ItemUsed.ActionValue, out CombatContext.RestoreAmount);
+                    CombatContext.Player.RestoreMP(CombatContext);
+                    break;
+                }
+                case ActionType.StealMP:
+                {
+                    int.TryParse(CombatContext.ItemUsed.ActionValue, out CombatContext.StealAmount);
+                    CombatContext.Player.StealMP(CombatContext.Enemy, CombatContext);
+                    break;
+                }
+                case ActionType.UseSkill:
+                {
+                    SkillData skillData = SkillSystem.Instance.GetSkillData(itemDataSlot.ItemData.ActionValue);
+                    if (skillData != null)
+                    {
+                        CombatContext.SkillUsed = skillData;
+                        ProcessSkill(CombatContext.Player, CombatContext.Enemy, skillData);
+                    }
+                    break;
+                }
+            }
+
+            if (hasLeftBattle)
+            {
+                return;
+            }
+
+            ProcessEndOfPlayerTurn();
+        }
+
+        private void ProcessEndOfPlayerTurn()
+        {
+            if (CombatContext.Enemy.IsDead())
+            {
+                KillEnemy();
+                return;
+            }
+
+            if (CombatContext.Enemy.CanAttack())
+            {
+                ProcessEnemyTurn();
+            }
+
+            StartCoroutine(DisableThenReenableButtons());
+        }
+
+        private void ResetContextForNewTurn()
+        {
+            CombatContext.DamageDealt = 0;
+            CombatContext.HealingAmount = 0;
+            CombatContext.RestoreAmount = 0;
+            CombatContext.StealAmount = 0;
+            CombatContext.SkillUsed = null;
+            CombatContext.ItemUsed = null;
+            CombatContext.EnemyActionUsed = null;
+            CombatContext.EnemyWasDead = CombatContext.Enemy.IsDead();
+            CombatContext.Player.ProcessActiveSkillLifetimes(SkillLifetime.Turn);
+            CombatContext.Enemy.ProcessActiveSkillLifetimes(SkillLifetime.Turn);
+            CombatContext.Enemy.ProcessActionCooldowns();
+            CombatContext.Enemy.ProcessBuffs();
+        }
+
+        public void ProcessEnemyTurn()
+        {
+            ResetContextForNewTurn();
+
+            CombatContext.Enemy.PrepareForAttack();
+            CombatContext.EnemyActionUsed = CombatContext.Enemy.ActionToPerform;
+            CombatContext.SkillUsed = CombatContext.EnemyActionUsed != null ? SkillSystem.Instance.GetSkillData(CombatContext.EnemyActionUsed.SkillToUseName) : null;
+
+            if (CombatContext.Enemy.DidAttackSuccessfully())
+            {
+                if (CombatContext.SkillUsed != null)
+                {
+                    CombatContext.Enemy.AttackTargetWithSkill(CombatContext.Player, CombatContext.SkillUsed, CombatContext);
+                }
+                else if (CombatContext.EnemyActionUsed.BuffTurns > 0)
+                {
+                }
+                else if (CombatContext.EnemyActionUsed.DamageMultiplier > 0.0)
+                {
+                    CombatContext.Enemy.AttackTargetWithEnemyAction(CombatContext.Player, CombatContext);
+                    if (CombatContext.EnemyActionUsed.HealAmount > 0.0 && CombatContext.DamageDealt > 0)
+                    {
+                        CombatContext.HealingAmount = (int)(CombatContext.DamageDealt * CombatContext.EnemyActionUsed.HealAmount);
+                        CombatContext.Enemy.Heal(CombatContext);
+                    }
+                }
+                else if (CombatContext.EnemyActionUsed.HealAmount > 0.0)
+                {
+                    CombatContext.HealingAmount = (int)(CombatContext.Enemy.MaxHP * CombatContext.EnemyActionUsed.HealAmount);
+                    CombatContext.Enemy.Heal(CombatContext);
+                }
+
+                if (CombatContext.Player.IsDead())
+                {
+                    KillPlayer();
+                }
+            }
+            else
+            {
+                if (CombatContext.SkillUsed != null)
+                {
+                    GameEvents.EnemySkillFailed(CombatContext);
+                }
+                else
+                {
+                    GameEvents.EnemyMissed(CombatContext);
+                }
+            }
+        }
+
+        public void KillEnemy()
+        {
+            GameEvents.EnemyKilled(CombatContext);
+
+            int goldLoot = CombatContext.Enemy.Data.Loot + UnityEngine.Random.Range(0, 3);
+            totalEarnedGold += goldLoot;
+            GameEvents.GetGold(goldLoot);
+
+            var lootFound = LootSystem.Instance.RollLoot(CombatContext.Enemy.Data.LootTableDataList, CombatContext.Player.Level + 5);
+            if (lootFound != null && lootFound.Count > 0)
+            {
+                foreach (var loot in lootFound)
+                {
+                    if (!loot.ItemDataSlot.ItemData.IsStackable())
+                    {
+                        lootEarned.Add(loot);
+                        continue;
+                    }
+                    bool alreadyFound = false;
+                    foreach (var earnedLoot in lootEarned)
+                    {
+                        if (loot.ItemDataSlot.ItemData == earnedLoot.ItemDataSlot.ItemData)
+                        {
+                            earnedLoot.Count += loot.Count;
+                            alreadyFound = true;
+                            break;
+                        }
+                    }
+                    if (!alreadyFound)
+                    {
+                        lootEarned.Add(loot);
+                    }
+                }
+                GameEvents.GetLoot(lootFound);
+            }
+            hasLeftBattle = true;
+
+            CombatContext.Player.ProcessActiveSkillLifetimes(SkillLifetime.Battle);
+
+            PlayerSystem.Instance.Player.EarnXP(CombatContext.Enemy.Data.XP);
+            totalEarnedXP += CombatContext.Enemy.Data.XP;
+            if (PlayerSystem.Instance.Player.StatPointsRemaining > 0)
+            {
+                PlayerLeveledUp();
+            }
+            else
+            {
+                PlayerFinishedCombat();
+            }
+        }
+
+        IEnumerator DisableThenReenableButtons()
+        {
+            var afterCombatButtons = AfterCombatActionsView.GetComponentsInChildren<Button>();
+            var combatButtons = CombatActionsView.GetComponentsInChildren<Button>();
+            foreach (var button in afterCombatButtons)
+            {
+                button.interactable = false;
+            }
+            foreach (var button in combatButtons)
+            {
+                button.interactable = false;
+            }
+
+            yield return new WaitForSeconds(0.25f);
+
+            foreach (var button in afterCombatButtons)
+            {
+                button.interactable = true;
+            }
+            foreach (var button in combatButtons)
+            {
+                button.interactable = true;
+            }
+        }
+
+        public void KillPlayer()
+        {
+            GameEvents.PlayerKilled(CombatContext);
+            ShowSummaryView(CombatSummary.Defeat);
+        }
+
+        public void PlayerFinishedCombat()
+        {
+            if (DungeonSystem.Instance.IsLastRoomOfDungeon())
+            {
+                ShowSummaryView(CombatSummary.Victory);
+            }
+            else
+            {
+                if (DungeonSystem.Instance.IsLastRoomOfFloor())
+                {
+                    CombatContext.Player.ProcessActiveSkillLifetimes(SkillLifetime.Floors);
+                }
+                CombatActionsView.SafeSetActive(false);
+                AfterCombatContinueButton.SafeSetActive(true);
+                AfterCombatItemButton.SafeSetActive(true);
+                AfterCombatSkillButton.SafeSetActive(true);
+                AfterCombatActionsView.SafeSetActive(true);
+
+                StartCoroutine(DisableThenReenableButtons());
+            }
+        }
+
+        public void PlayerEscaped()
+        {
+            hasLeftBattle = true;
+            ShowSummaryView(CombatSummary.Escaped);
+        }
+
+        public void ShowSummaryView(CombatSummary combatResult)
+        {
+            CombatLogView.gameObject.SafeSetActive(false);
+            CombatActionsView.SafeSetActive(false);
+            SummaryView.SafeSetActive(true);
+            AfterCombatActionsView.SafeSetActive(true);
+            AfterCombatContinueButton.SafeSetActive(false);
+            AfterCombatItemButton.SafeSetActive(false);
+            AfterCombatSkillButton.SafeSetActive(false);
+
+            if (combatResult == CombatSummary.Victory)
+            {
+                ResultText.text = "<color=#00AAFF>You've Won!</color>";
+            }
+            else if (combatResult == CombatSummary.Defeat)
+            {
+                ResultText.text = "<color=red>You've Been Defeated!</color>";
+            }
+            else
+            {
+                ResultText.text = "<color=#00FFFF>You've Escaped!</color>";
+            }
+
+            StartCoroutine(DisableThenReenableButtons());
+
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine("Combat Summary:");
+            sb.AppendLine();
+            sb.AppendLine("Earned:");
+            sb.AppendLine();
+            sb.AppendLine($"<color=purple>{totalEarnedXP} XP</color>");
+            sb.AppendLine($"<color=yellow>{totalEarnedGold} Gold</color>");
+            sb.AppendLine();
+            if (lootEarned.Count > 0)
+            {
+                sb.AppendLine("Found:");
+                sb.AppendLine();
+                foreach (var item in lootEarned)
+                {
+                    if (item.Count > 0)
+                    {
+                        sb.AppendLine($"{ItemSystem.Instance.BuildName(item.ItemDataSlot)} x{item.Count}");
+                    }
+                    else
+                    {
+                        sb.AppendLine(ItemSystem.Instance.BuildName(item.ItemDataSlot));
+                    }
+                }
+            }
+            SummaryText.text = sb.ToString();
+
+            CombatContext.Player.ProcessActiveSkillLifetimes(SkillLifetime.Dungeon);
+        }
+
+        public void SelectContinue()
+        {
+            CombatActionsView.SafeSetActive(true);
+            AfterCombatActionsView.SafeSetActive(false);
+            CombatSelectionView.gameObject.SafeSetActive(false);
+            CombatLogView.gameObject.SafeSetActive(true);
+
+            DungeonSystem.Instance.AdvanceRoom();
+        }
+
+        public void SelectReturnToTown()
+        {
+            if (!SummaryView.gameObject.activeSelf)
+            {
+                PlayerEscaped();
+                return;
+            }
+            if (CombatContext.Player.IsDead())
+            {
+                GameEvents.RestAtInn();
+            }
+            CombatView.SafeSetActive(false);
+            GameEvents.OnEnterTown();
+        }
+
+        public void PlayerLeveledUp()
+        {
+            CombatLogView.gameObject.SafeSetActive(false);
+            CombatActionsView.SafeSetActive(false);
+            PlayerCombatStatsView.gameObject.SafeSetActive(false);
+            EnemyCombatStatsView.gameObject.SafeSetActive(false);
+            PlayerStatsView.Setup();
+            LevelUpView.SafeSetActive(true);
+            UpdateStatPointsRemaining();
+        }
+
+        public void UpdateStatPointsRemaining()
+        {
+            StatPointsRemainingText.text = $"Stat Points Remaining: {PlayerSystem.Instance.Player.StatPointsRemaining}";
+        }
+
+        public void AddStatFromLevelingUp(string stat)
+        {
+            switch (stat)
+            {
+                case "Strength":
+                {
+                    PlayerSystem.Instance.Player.Strength++;
+                    break;
+                }
+                case "Intelligence":
+                {
+                    PlayerSystem.Instance.Player.Intelligence++;
+                    PlayerSystem.Instance.Player.MP = PlayerSystem.Instance.Player.MaxMP;
+                    GameEvents.PlayerMaxMPChanged();
+                    break;
+                }
+                case "Endurance":
+                {
+                    PlayerSystem.Instance.Player.Endurance++;
+                    PlayerSystem.Instance.Player.HP = PlayerSystem.Instance.Player.MaxHP;
+                    GameEvents.PlayerMaxHPChanged();
+                    break;
+                }
+                case "Agility":
+                {
+                    PlayerSystem.Instance.Player.Agility++;
+                    break;
+                }
+            }
+            PlayerSystem.Instance.Player.StatPointsRemaining--;
+            PlayerStatsView.Setup();
+            UpdateStatPointsRemaining();
+            if (PlayerSystem.Instance.Player.StatPointsRemaining <= 0)
+            {
+                PlayerFinishedLevelingUp();
+            }
+        }
+
+        public void PlayerFinishedLevelingUp()
+        {
+            CombatLogView.gameObject.SafeSetActive(true);
+            CombatActionsView.SafeSetActive(true);
+            PlayerCombatStatsView.gameObject.SafeSetActive(true);
+            EnemyCombatStatsView.gameObject.SafeSetActive(true);
+            LevelUpView.SafeSetActive(false);
+
+            PlayerFinishedCombat();
+        }
+
+    }
+}
