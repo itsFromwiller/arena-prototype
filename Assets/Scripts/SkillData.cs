@@ -6,9 +6,12 @@ namespace Arena.Combat
     public enum SkillType
     {
         DealDamage,
+        DealDamageOverTime,
         DealMDamage,
+        DealMDamageOverTime,
         EscapeDungeon,
         Heal,
+        HealOverTime,
         StealMP,
         ModifyAttack,
         ModifyMAttack,
