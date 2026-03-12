@@ -56,6 +56,7 @@ public class GameEvents
     public static Action<CombatContext> OnEnemyMissed;
     public static Action<CombatContext> OnEnemySkillFailed;
     public static Action<CombatContext> OnEnemyKilled;
+    public static Action<CombatContext> OnEnemyBuffStarted;
     public static Action OnEndCombat;
 
     public static void GetGold(int amount)
@@ -262,6 +263,11 @@ public class GameEvents
     public static void EnemyGotInitiative(EnemyEntity enemyEntity)
     {
         OnEnemyGotInitiative?.Invoke(enemyEntity);
+    }
+
+    public static void EnemyBuffStarted(CombatContext combatContext)
+    {
+        OnEnemyBuffStarted?.Invoke(combatContext);
     }
 
     public static void EndCombat()

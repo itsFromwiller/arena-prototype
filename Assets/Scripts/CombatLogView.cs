@@ -43,6 +43,7 @@ public class CombatLogView : MonoBehaviour
         GameEvents.OnEnemySkillFailed += OnEnemySkillFailed;
         GameEvents.OnEnemySpawned += OnEnemySpawned;
         GameEvents.OnEnemyGotInitiative += OnEnemyGotInitiative;
+        GameEvents.OnEnemyBuffStarted += OnEnemyBuffStarted;
         GameEvents.OnEnterDungeonRoom += OnEnterDungeonRoom;
     }
 
@@ -63,8 +64,10 @@ public class CombatLogView : MonoBehaviour
         GameEvents.OnEnemyStealMP -= OnEnemyStealMP;
         GameEvents.OnEnemyKilled -= OnEnemyKilled;
         GameEvents.OnEnemyMissed -= OnEnemyMissed;
+        GameEvents.OnEnemySkillFailed -= OnEnemySkillFailed;
         GameEvents.OnEnemySpawned -= OnEnemySpawned;
         GameEvents.OnEnemyGotInitiative -= OnEnemyGotInitiative;
+        GameEvents.OnEnemyBuffStarted -= OnEnemyBuffStarted;
         GameEvents.OnEnterDungeonRoom -= OnEnterDungeonRoom;
     }
 
@@ -220,7 +223,7 @@ public class CombatLogView : MonoBehaviour
     {
         if (combatContext.SkillUsed != null)
         {
-            AddToLog($"{combatContext.Enemy.Data.Name} cast {combatContext.SkillUsed.Name}, {combatContext.SkillUsed.CombatText} it for {combatContext.HealingAmount}");
+            AddToLog($"{combatContext.Enemy.Data.Name} casts {combatContext.SkillUsed.Name}, {combatContext.SkillUsed.CombatText} it for {combatContext.HealingAmount}");
         }
         else if (combatContext.EnemyActionUsed != null)
         {
@@ -236,7 +239,7 @@ public class CombatLogView : MonoBehaviour
     {
         if (combatContext.SkillUsed != null)
         {
-            AddToLog($"{combatContext.Enemy.Data.Name} cast {combatContext.SkillUsed.Name}, {combatContext.SkillUsed.CombatText} by {combatContext.RestoreAmount}");
+            AddToLog($"{combatContext.Enemy.Data.Name} casts {combatContext.SkillUsed.Name}, {combatContext.SkillUsed.CombatText} by {combatContext.RestoreAmount}");
         }
         else
         {
@@ -248,7 +251,7 @@ public class CombatLogView : MonoBehaviour
     {
         if (combatContext.SkillUsed != null)
         {
-            AddToLog($"{BadColor}{combatContext.Enemy.Data.Name} cast {combatContext.SkillUsed.Name}, {combatContext.SkillUsed.CombatText} you, restoring its magic points by {combatContext.StealAmount}</color>");
+            AddToLog($"{BadColor}{combatContext.Enemy.Data.Name} casts {combatContext.SkillUsed.Name}, {combatContext.SkillUsed.CombatText} you, restoring its magic points by {combatContext.StealAmount}</color>");
         }
         else
         {
@@ -263,7 +266,7 @@ public class CombatLogView : MonoBehaviour
 
     private void OnEnemySkillFailed(CombatContext combatContext)
     {
-        AddToLog($"{combatContext.Enemy.Data.Name} tried to use {combatContext.SkillUsed.Name}, but failed!");
+        AddToLog($"{combatContext.Enemy.Data.Name} tried to cast {combatContext.SkillUsed.Name}, but failed!");
     }
 
     private void OnEnemyKilled(CombatContext combatContext)
@@ -326,5 +329,10 @@ public class CombatLogView : MonoBehaviour
     private void OnEnemyGotInitiative(EnemyEntity enemy)
     {
         AddToLog($"{BadColor}{enemy.Data.Name} got the initiative and goes first!</color>");
+    }
+
+    private void OnEnemyBuffStarted(CombatContext combatContext)
+    {
+        AddToLog($"{BadColor}{combatContext.Enemy.Data.Name} {combatContext.EnemyActionUsed.SuccessText}</color>");
     }
 }

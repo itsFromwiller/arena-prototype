@@ -47,11 +47,12 @@ namespace Arena.Enemies
 
         public void ProcessActionCooldowns()
         {
-            foreach (var entry in ActionCooldown.Keys)
+            var keys = new List<string>(ActionCooldown.Keys);
+            foreach (var key in keys)
             {
-                if (ActionCooldown[entry] > 0)
+                if (ActionCooldown[key] > 0)
                 {
-                    ActionCooldown[entry]--;
+                    ActionCooldown[key]--;
                 }
             }
         }
@@ -67,6 +68,7 @@ namespace Arena.Enemies
                 }
                 if (activeBuff.IsExpired)
                 {
+                    Debug.LogError($"Expired {activeBuff.BuffName}");
                     ActiveBuffs.RemoveAt(i);
                     continue;
                 }
@@ -76,10 +78,10 @@ namespace Arena.Enemies
         public void PrepareForAttack()
         {
             List<EnemyActionData> randomActions = new List<EnemyActionData>();
-
+            
             foreach (var action in Data.ActionDataList)
             {
-                // Skip all conditional types, they are handled elsewhere
+                // Conditional actions are handled elsewhere
                 if (action.ConditionType != ConditionType.None)
                 {
                     continue;
@@ -90,18 +92,27 @@ namespace Arena.Enemies
                     continue;
                 }
                 // If the action has been used already, check if it is on cooldown
-                if (ActionCooldown.TryGetValue(action.Name, out int turnsRemainingOnCooldown))
+                if (IsActionOnCooldown(action.Name))
                 {
-                    if (turnsRemainingOnCooldown > 0)
-                    {
-                        continue;
-                    }
+                    continue;
                 }
                 randomActions.Add(action);
             }
 
             randomActions.Randomize();
             ActionToPerform = randomActions.Count > 0 ? randomActions[0] : null;
+        }
+
+        public bool IsActionOnCooldown(string name)
+        {
+            if (ActionCooldown.TryGetValue(name, out int turnsRemainingOnCooldown))
+            {
+                if (turnsRemainingOnCooldown > 0)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         public override bool DidAttackSuccessfully()
@@ -113,25 +124,38 @@ namespace Arena.Enemies
                 GameEvents.EnemyStateUpdated(this);
             }
 
-            if (!ActionCooldown.ContainsKey(ActionToPerform.Name))
-            {
-                ActionCooldown.Add(ActionToPerform.Name, 0);
-            }
-            ActionCooldown[ActionToPerform.Name] += ActionToPerform.ConditionCooldownTurns;
+            StartActionCooldown(ActionToPerform);
 
             if (Random.Range(0.0f, 1.0f) < chanceToHit)
             {
-                if (ActionToPerform.BuffTurns > 0)
-                {
-                    if (ActionToPerform.DamageMultiplier > 0.0)
-                    {
-                        ActiveBuffs.Add(new BuffEntity($"{ActionToPerform.Name}_atk", SkillType.ModifyAllAttack, ActionToPerform.DamageMultiplier, ActionToPerform.BuffTurns));
-                    }
-                    // TODO, the defense
-                }
                 return true;
             }
             return false;
+        }
+
+        public void StartActionCooldown(EnemyActionData enemyAction)
+        {
+            if (!ActionCooldown.ContainsKey(enemyAction.Name))
+            {
+                ActionCooldown.Add(enemyAction.Name, 0);
+            }
+            ActionCooldown[enemyAction.Name] += enemyAction.CooldownTurns;
+            Debug.LogError($"{enemyAction.Name} cooldown set to {ActionCooldown[enemyAction.Name]}");
+        }
+
+        public void HandleBuffsForEnemyAction(EnemyActionData enemyAction)
+        {
+            if (enemyAction.DamageMultiplier > 0.0)
+            {
+                ActiveBuffs.Add(new BuffEntity($"{enemyAction.Name}_atk", SkillType.ModifyAllAttack, enemyAction.DamageMultiplier, enemyAction.BuffTurns));
+                Debug.LogError($"Added {ActiveBuffs[ActiveBuffs.Count - 1].BuffName}");
+            }
+            if (enemyAction.DefenseMultiplier > 0.0)
+            {
+                ActiveBuffs.Add(new BuffEntity($"{enemyAction.Name}_def", SkillType.ModifyAllDefense, enemyAction.DefenseMultiplier, enemyAction.BuffTurns));
+                Debug.LogError($"Added {ActiveBuffs[ActiveBuffs.Count - 1].BuffName}");
+            }
+
         }
 
         public override bool DidUseSkillSuccessfully(CombatContext combatContext)

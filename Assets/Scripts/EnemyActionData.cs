@@ -32,9 +32,9 @@
         public double HealAmount = 0.0;
         public int BuffTurns = 0;
         public double DefenseMultiplier = 0.0;
+        public int CooldownTurns = 0;
         public string ConditionName = "None";
         public ConditionType ConditionType; // Parsed at runtime, not from data
         public int ConditionValue = 0;
-        public int ConditionCooldownTurns = 0;
     }
 }

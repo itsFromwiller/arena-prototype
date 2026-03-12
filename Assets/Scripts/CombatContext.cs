@@ -9,6 +9,10 @@ namespace Arena.Combat
         // Setup at start
         public PlayerEntity Player;
         public EnemyEntity Enemy;
+
+        // Incremented each round
+        public int TurnCount;
+        
         // Reset each round
         public int DamageDealt;
         public int HealingAmount;

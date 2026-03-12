@@ -106,6 +106,7 @@ namespace Arena.Combat
             CombatContext.Player = PlayerSystem.Instance.Player;
             CombatContext.DamageDealt = 0;
             CombatContext.HealingAmount = 0;
+            CombatContext.TurnCount = 0;
         }
 
         void HandleEnterCombat()
@@ -122,11 +123,13 @@ namespace Arena.Combat
 
         void HandleStartCombat()
         {
-//            CombatActionsView.SafeSetActive(true);
-//            AfterCombatActionsView.SafeSetActive(false);
-//            CombatSelectionView.gameObject.SafeSetActive(false);
-//            SummaryView.SafeSetActive(false);
-//            CombatLogView.gameObject.SafeSetActive(true);
+            //            CombatActionsView.SafeSetActive(true);
+            //            AfterCombatActionsView.SafeSetActive(false);
+            //            CombatSelectionView.gameObject.SafeSetActive(false);
+            //            SummaryView.SafeSetActive(false);
+            //            CombatLogView.gameObject.SafeSetActive(true);
+
+            ProcessStartCombatConditionalEnemyActions();
 
             if (CombatContext.Enemy.GetInitiative() > CombatContext.Player.GetInitiative())
             {
@@ -298,9 +301,21 @@ namespace Arena.Combat
 
         private void ProcessEndOfPlayerTurn()
         {
+            // Enemies can get a last hit in with
+            // damaged conditional actions
+            ProcessDamagedConditionalEnemyActions();
+
+            // Enemies will die first for loot
             if (CombatContext.Enemy.IsDead())
             {
                 KillEnemy();
+                return;
+            }
+
+            // Then we can process player death
+            if (CombatContext.Player.IsDead())
+            {
+                KillPlayer();
                 return;
             }
 
@@ -314,6 +329,17 @@ namespace Arena.Combat
 
         private void ResetContextForNewTurn()
         {
+            ResetContext();
+            CombatContext.EnemyWasDead = CombatContext.Enemy.IsDead();
+            CombatContext.Player.ProcessActiveSkillLifetimes(SkillLifetime.Turn);
+            CombatContext.Enemy.ProcessActiveSkillLifetimes(SkillLifetime.Turn);
+            CombatContext.Enemy.ProcessActionCooldowns();
+            CombatContext.Enemy.ProcessBuffs();
+            CombatContext.TurnCount++;
+        }
+
+        public void ResetContext()
+        {
             CombatContext.DamageDealt = 0;
             CombatContext.HealingAmount = 0;
             CombatContext.RestoreAmount = 0;
@@ -321,16 +347,13 @@ namespace Arena.Combat
             CombatContext.SkillUsed = null;
             CombatContext.ItemUsed = null;
             CombatContext.EnemyActionUsed = null;
-            CombatContext.EnemyWasDead = CombatContext.Enemy.IsDead();
-            CombatContext.Player.ProcessActiveSkillLifetimes(SkillLifetime.Turn);
-            CombatContext.Enemy.ProcessActiveSkillLifetimes(SkillLifetime.Turn);
-            CombatContext.Enemy.ProcessActionCooldowns();
-            CombatContext.Enemy.ProcessBuffs();
         }
 
         public void ProcessEnemyTurn()
         {
             ResetContextForNewTurn();
+
+            ProcessStartTurnConditionalEnemyActions();
 
             CombatContext.Enemy.PrepareForAttack();
             CombatContext.EnemyActionUsed = CombatContext.Enemy.ActionToPerform;
@@ -342,22 +365,9 @@ namespace Arena.Combat
                 {
                     CombatContext.Enemy.AttackTargetWithSkill(CombatContext.Player, CombatContext.SkillUsed, CombatContext);
                 }
-                else if (CombatContext.EnemyActionUsed.BuffTurns > 0)
+                else
                 {
-                }
-                else if (CombatContext.EnemyActionUsed.DamageMultiplier > 0.0)
-                {
-                    CombatContext.Enemy.AttackTargetWithEnemyAction(CombatContext.Player, CombatContext);
-                    if (CombatContext.EnemyActionUsed.HealAmount > 0.0 && CombatContext.DamageDealt > 0)
-                    {
-                        CombatContext.HealingAmount = (int)(CombatContext.DamageDealt * CombatContext.EnemyActionUsed.HealAmount);
-                        CombatContext.Enemy.Heal(CombatContext);
-                    }
-                }
-                else if (CombatContext.EnemyActionUsed.HealAmount > 0.0)
-                {
-                    CombatContext.HealingAmount = (int)(CombatContext.Enemy.MaxHP * CombatContext.EnemyActionUsed.HealAmount);
-                    CombatContext.Enemy.Heal(CombatContext);
+                    HandleEnemyActionUsed();
                 }
 
                 if (CombatContext.Player.IsDead())
@@ -375,6 +385,141 @@ namespace Arena.Combat
                 {
                     GameEvents.EnemyMissed(CombatContext);
                 }
+            }
+        }
+
+        public void ProcessStartTurnConditionalEnemyActions()
+        {
+            foreach (var action in CombatContext.Enemy.Data.ActionDataList)
+            {
+                if (action.ConditionType != ConditionType.None)
+                {
+                    if (CombatContext.Enemy.IsActionOnCooldown(action.Name))
+                    {
+                        continue;
+                    }
+
+                    bool actionTriggered = false;
+
+                    switch (action.ConditionType)
+                    {
+                        case ConditionType.TurnCount:
+                        {
+                            if (action.ConditionValue % CombatContext.TurnCount == 0)
+                            {
+                                actionTriggered = true;
+                            }
+                            break;
+                        }
+                    }
+
+                    if (actionTriggered)
+                    {
+                        ProcessConditionalEnemyAction(action);
+                    }
+                }
+            }
+        }
+
+        public void ProcessDamagedConditionalEnemyActions()
+        {
+            foreach (var action in CombatContext.Enemy.Data.ActionDataList)
+            {
+                if (action.ConditionType != ConditionType.None)
+                {
+                    if (CombatContext.Enemy.IsActionOnCooldown(action.Name))
+                    {
+                        continue;
+                    }
+
+                    bool actionTriggered = false;
+                    switch (action.ConditionType)
+                    {
+                        case ConditionType.TakeDamage:
+                        {
+                            actionTriggered = !CombatContext.Enemy.IsDead() && CombatContext.DamageDealt > 0;
+                            break;
+                        }
+                        case ConditionType.Death:
+                        {
+                            actionTriggered = CombatContext.Enemy.IsDead();
+                            break;
+                        }
+                        case ConditionType.HPUnderPercent:
+                        {
+                            actionTriggered = !CombatContext.Enemy.IsDead() && ((double)CombatContext.Enemy.HP / CombatContext.Enemy.MaxHP) < ((double)action.ConditionValue / 100);
+                            break;
+                        }
+                    }
+
+                    if (actionTriggered)
+                    {
+                        ProcessConditionalEnemyAction(action);
+                    }
+                }
+            }
+        }
+
+        public void ProcessStartCombatConditionalEnemyActions()
+        {
+            foreach (var action in CombatContext.Enemy.Data.ActionDataList)
+            {
+                if (action.ConditionType != ConditionType.None)
+                {
+                    if (CombatContext.Enemy.IsActionOnCooldown(action.Name))
+                    {
+                        continue;
+                    }
+
+                    bool actionTriggered = false;
+
+                    switch (action.ConditionType)
+                    {
+                        case ConditionType.CombatStart:
+                        {
+                            actionTriggered = true;
+                            break;
+                        }
+                    }
+
+                    if (actionTriggered)
+                    {
+                        ProcessConditionalEnemyAction(action);
+                    }
+                }
+            }
+        }
+
+        public void ProcessConditionalEnemyAction(EnemyActionData action)
+        {
+            CombatContext.EnemyActionUsed = action;
+            CombatContext.Enemy.StartActionCooldown(action);
+            HandleEnemyActionUsed();
+
+            // Reset the context for our next attacks
+            ResetContext();
+        }
+
+        public void HandleEnemyActionUsed()
+        {
+            if (CombatContext.EnemyActionUsed.BuffTurns > 0)
+            {
+                CombatContext.Enemy.HandleBuffsForEnemyAction(CombatContext.EnemyActionUsed);
+                GameEvents.EnemyBuffStarted(CombatContext);
+            }
+            else if (CombatContext.EnemyActionUsed.DamageMultiplier > 0.0)
+            {
+                CombatContext.Enemy.AttackTargetWithEnemyAction(CombatContext.Player, CombatContext);
+                if (CombatContext.EnemyActionUsed.HealAmount > 0.0 && CombatContext.DamageDealt > 0)
+                {
+                    CombatContext.HealingAmount = Math.Max(1, (int)(CombatContext.DamageDealt * CombatContext.EnemyActionUsed.HealAmount));
+                    CombatContext.Enemy.Heal(CombatContext);
+                }
+            }
+            else if (CombatContext.EnemyActionUsed.HealAmount > 0.0)
+            {
+                CombatContext.HealingAmount = (int)(CombatContext.Enemy.MaxHP * CombatContext.EnemyActionUsed.HealAmount);
+                CombatContext.Enemy.Heal(CombatContext);
             }
         }
 
@@ -462,6 +607,12 @@ namespace Arena.Combat
 
         public void PlayerFinishedCombat()
         {
+            if (CombatContext.Player.IsDead())
+            {
+                KillPlayer();
+                return;
+            }
+
             if (DungeonSystem.Instance.IsLastRoomOfDungeon())
             {
                 ShowSummaryView(CombatSummary.Victory);

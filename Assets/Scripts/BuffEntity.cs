@@ -35,20 +35,12 @@ namespace Arena.Combat
             IsExpired = false;
         }
 
-        public void TurnEnded()
-        {
-            if (IsExpired)
-            {
-                return;
-            }
-            DecrementLifetimeValue();
-        }
-
         public void DecrementLifetimeValue()
         {
             if (LifetimeValue > 0)
             {
                 LifetimeValue--;
+                Debug.LogError($"Decrementing {BuffName} to {LifetimeValue}");
                 if (LifetimeValue == 0)
                 {
                     IsExpired = true;

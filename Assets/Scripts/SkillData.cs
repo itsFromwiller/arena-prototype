@@ -58,8 +58,10 @@ namespace Arena.Combat
         public int SkillValue;
         public double SkillPercentage;
         public double SuccessRate;
+        public int RepeatTurns;
         public string Description;
         public string CombatText;
+        public string RepeatText;
 
         // Use this for initialization
         void Start()

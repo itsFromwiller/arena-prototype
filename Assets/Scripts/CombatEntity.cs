@@ -150,7 +150,7 @@ namespace Arena.Combat
 
         public void AttackTarget(CombatEntity target, CombatContext combatContext)
         {
-            combatContext.DamageDealt = ReducedDamageFromDefense((int) (CalculatedAttack() * combatContext.EnemyActionUsed.DamageMultiplier), target.CalculatedDefense());
+            combatContext.DamageDealt = ReducedDamageFromDefense(CalculatedAttack(), target.CalculatedDefense());
             target.TakeDamage(this, combatContext);
         }
 
