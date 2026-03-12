@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using UnityEditor;
 using UnityEditor.Build.Reporting;
 using System.Diagnostics;
@@ -70,3 +71,4 @@ namespace Arena.Core.Builds
         }
     }
 }
+#endif
