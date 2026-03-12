@@ -14,7 +14,6 @@ namespace Arena.Core.Builds
         [MenuItem("Build/Build WebGL and Push to GitHub")]
         public static void BuildAndPush()
         {
-            // 1. Run the WebGL Build
             BuildPlayerOptions buildPlayerOptions = new BuildPlayerOptions();
             buildPlayerOptions.scenes = new[] { "Assets/Scenes/SampleScene.unity" };
             buildPlayerOptions.locationPathName = buildPath;
@@ -37,11 +36,11 @@ namespace Arena.Core.Builds
 
         private static void RunGitCommands()
         {
-            // 2. Execute Git commands sequentially
             // Ensure you have Git installed and accessible in your system PATH
             RunCommand("git", "add .");
             RunCommand("git", "commit -m \"Automated WebGL Build: " + System.DateTime.Now.ToString() + "\"");
-            RunCommand("git", "push origin main"); // Ensure 'main' matches your branch name
+            // Ensure 'main' matches your branch name, we typically use main for our builds
+            RunCommand("git", "push origin main");
 
             UnityEngine.Debug.Log("Git commands executed successfully!");
         }
@@ -52,7 +51,7 @@ namespace Arena.Core.Builds
             {
                 FileName = fileName,
                 Arguments = arguments,
-                WorkingDirectory = Path.GetDirectoryName(Application.dataPath), // Project root
+                WorkingDirectory = Path.GetDirectoryName(Application.dataPath),
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 UseShellExecute = false,
@@ -66,7 +65,9 @@ namespace Arena.Core.Builds
                 string error = process.StandardError.ReadToEnd();
 
                 if (!string.IsNullOrEmpty(error) && !error.Contains("warning"))
+                {
                     UnityEngine.Debug.LogWarning("Git Error/Warning: " + error);
+                }
             }
         }
     }
