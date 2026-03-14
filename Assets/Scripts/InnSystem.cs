@@ -115,7 +115,7 @@ namespace Arena.Inn
         {
             // Build list of books to study
             var itemDataSlots = PlayerSystem.Instance.Player.GetStudyItems();
-            StudySelectionListView.SetupItemDataView(itemDataSlots, ItemSelectionItemView.ActionType.Study, false);
+            StudySelectionListView.SetupItemDataView(itemDataSlots, ItemSelectionItemView.ActionType.Study, false, 1.0);
 
             MainOptionView.SafeSetActive(false);
             StudyView.SafeSetActive(true);

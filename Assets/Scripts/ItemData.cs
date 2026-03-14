@@ -66,9 +66,9 @@ namespace Arena.Items
         public bool ExcludeFromLoot = false;
         public bool ShopItem = false;
 
-        public int GetSellCost()
+        public int GetSellCost(double shopSalePercentage)
         {
-            return ItemType == ItemType.Material ? Cost : Math.Max(1, Cost / 2);
+            return ItemType == ItemType.Material ? Cost : Math.Max(1, (int) (Cost * shopSalePercentage));
         }
 
         public bool IsStackable()

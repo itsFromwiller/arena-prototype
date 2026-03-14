@@ -55,9 +55,9 @@ namespace Arena.Items
             return (int)(ItemData.Cost * GetCostMultiplier());
         }
 
-        public int GetSellCost()
+        public int GetSellCost(double shopSalePercentage)
         {
-            return (int) (ItemData.GetSellCost() * GetCostMultiplier());
+            return (int) (ItemData.GetSellCost(shopSalePercentage) * GetCostMultiplier());
         }
 
         public int GetCalculatedAttack()

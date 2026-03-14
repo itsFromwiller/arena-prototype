@@ -28,13 +28,15 @@ namespace Arena
         private ActionType SelectActionType;
         private SelectionView SelectionView;
         private int Id;
+        private double ShopSellPercentage = 0.5;
 
-        public void Setup(SelectionView selectionView, int id, ItemDataSlot itemDataSlot, ActionType selectActionType)
+        public void Setup(SelectionView selectionView, int id, ItemDataSlot itemDataSlot, ActionType selectActionType, double shopSellPercentage)
         {
             Id = id;
             SelectActionType = selectActionType;
             SelectionView = selectionView;
             ItemDataSlot = itemDataSlot;
+            ShopSellPercentage = shopSellPercentage;
 
             if (itemDataSlot.ItemData.IsStackable())
             {
@@ -60,7 +62,7 @@ namespace Arena
                 {
                     ActionText.text = "Sell";
                     ActionButton.SafeSetActive(true);
-                    ItemCostText.text = string.Format("{0:N0} g", itemDataSlot.GetSellCost() * itemDataSlot.Count);
+                    ItemCostText.text = string.Format("{0:N0} g", itemDataSlot.GetSellCost(shopSellPercentage) * itemDataSlot.Count);
                     ItemCostText.gameObject.SafeSetActive(true);
                     break;
                 }

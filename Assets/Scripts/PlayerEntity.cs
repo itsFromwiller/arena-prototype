@@ -439,14 +439,14 @@ namespace Arena.Player
             }
         }
 
-        public void SellItem(string itemName, int count, int itemID)
+        public void SellItem(string itemName, int count, int itemID, double shopSalePercentage)
         {
             for (int i = ItemSlots.Count - 1; i >= 0; --i)
             {
                 ItemDataSlot itemSlot = ItemSlots[i];
                 if (itemSlot.ItemID == itemID && itemSlot.Name == itemName)
                 {
-                    int costPerItem = itemSlot.GetSellCost();
+                    int costPerItem = itemSlot.GetSellCost(shopSalePercentage);
 
                     // If we have more than we are going to sell,
                     // sell and return early

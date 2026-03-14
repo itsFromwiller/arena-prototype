@@ -75,10 +75,10 @@ namespace Arena
         public void SetupItemDataViewForEquipment(List<ItemDataSlot> itemDataSlots, SlotType equipmentSlotType, ItemSelectionItemView.ActionType selectionActionType, bool keepScrollPosition)
         {
             EquipmentSlotType = equipmentSlotType;
-            SetupItemDataView(itemDataSlots, selectionActionType, keepScrollPosition);
+            SetupItemDataView(itemDataSlots, selectionActionType, keepScrollPosition, 1.0);
         }
 
-        public void SetupItemDataView(List<ItemDataSlot> itemDataSlots, ItemSelectionItemView.ActionType selectionActionType, bool keepScrollPosition)
+        public void SetupItemDataView(List<ItemDataSlot> itemDataSlots, ItemSelectionItemView.ActionType selectionActionType, bool keepScrollPosition, double shopSellPercentage)
         {
             float cachedPosition = ScrollView.verticalNormalizedPosition;
             HideViews();
@@ -99,7 +99,7 @@ namespace Arena
                     itemView = Instantiate<ItemSelectionItemView>(ItemViewTemplate, ScrollView.content);
                 }
                 ItemsInView.Add(i, itemView);
-                itemView.Setup(this, i, itemDataSlot, selectionActionType);
+                itemView.Setup(this, i, itemDataSlot, selectionActionType, shopSellPercentage);
                 itemView.gameObject.SafeSetActive(true);
                 itemView.Background.color = i % 2 == 0 ? new Color(0, 0, 0, 0) : new Color(0, 0, 0, 0.1f);
             }

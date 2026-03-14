@@ -23,6 +23,7 @@ namespace Arena.Shop
         private List<ItemDataSlot> CurrentSellableItems = new ();
         private List<ItemDataSlot> CurrentBuyableItems = new();
         private List<ItemDataSlot> CurrentBazaarItems = new();
+        private double ShopSellPercentage = 0.5;
 
         private void Awake()
         {
@@ -168,7 +169,7 @@ namespace Arena.Shop
             {
                 CurrentBuyableItems = ItemSystem.Instance.GetShopItemsFiltered(filterTypes, onlyMagicConsumables, onlyNonMagicConsumables, PlayerSystem.Instance.Player.Level + 5); ;
             }
-            SelectionView.SetupItemDataView(CurrentBuyableItems, ItemSelectionItemView.ActionType.Buy, false);
+            SelectionView.SetupItemDataView(CurrentBuyableItems, ItemSelectionItemView.ActionType.Buy, false, 1.0);
             ShowItemSelectionView(true);
         }
 
@@ -178,6 +179,8 @@ namespace Arena.Shop
             HashSet<ItemType> filterTypes = new HashSet<ItemType>();
             bool onlyMagicConsumables = false;
             bool onlyNonMagicConsumables = false;
+            ShopSellPercentage = 0.5;
+
             switch (ShopType)
             {
                 case "Weapons":
@@ -225,11 +228,12 @@ namespace Arena.Shop
                 }
                 case "Bazaar":
                 {
+                    ShopSellPercentage = 0.4;
                     break;
                 }
             }
             CurrentSellableItems = PlayerSystem.Instance.Player.GetCurrentItemsFiltered(filterTypes, onlyMagicConsumables, onlyNonMagicConsumables);
-            SelectionView.SetupItemDataView(CurrentSellableItems, ItemSelectionItemView.ActionType.Sell, false);
+            SelectionView.SetupItemDataView(CurrentSellableItems, ItemSelectionItemView.ActionType.Sell, false, ShopSellPercentage);
             ShowItemSelectionView(true);
         }
 
@@ -246,7 +250,7 @@ namespace Arena.Shop
 
         public void SellPlayerItem(ItemDataSlot itemDataSlot)
         {
-            PlayerSystem.Instance.Player.SellItem(itemDataSlot.ItemData.Name, itemDataSlot.Count, itemDataSlot.ItemID);
+            PlayerSystem.Instance.Player.SellItem(itemDataSlot.ItemData.Name, itemDataSlot.Count, itemDataSlot.ItemID, ShopSellPercentage);
             CurrentGold.text = $"Gold: {PlayerSystem.Instance.Player.Gold}";
         }
 

@@ -246,7 +246,7 @@ namespace Arena.Combat
         public void ShowItemList()
         {
             CurrentUsableItems = CombatContext.Player.GetCurrentItems(true, false);
-            CombatSelectionView.SetupItemDataView(CurrentUsableItems, ItemSelectionItemView.ActionType.Use, true);
+            CombatSelectionView.SetupItemDataView(CurrentUsableItems, ItemSelectionItemView.ActionType.Use, true, 1.0);
 
             CombatSelectionView.gameObject.SafeSetActive(true);
             CombatLogView.gameObject.SafeSetActive(false);
