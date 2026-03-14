@@ -22,5 +22,6 @@ namespace Arena.Combat
         public ItemData ItemUsed;
         public bool EnemyWasDead;
         public EnemyActionData EnemyActionUsed;
+        public bool IsRepeatedAction;
     }
 }

@@ -53,7 +53,7 @@ namespace Arena.Tavern
                 return;
             }
             
-            PlayerSystem.Instance.Player.AddActiveSkillEntity(new SkillEntity(skillData, SkillLifetime.Dungeon, 1));
+            PlayerSystem.Instance.Player.AddActiveSkillEntity(new SkillEntity(skillData, SkillLifetime.Dungeon, 1, false));
             if (skillData.SkillType == SkillType.ModifyMaxHP)
             {
                 PlayerSystem.Instance.Player.HP = PlayerSystem.Instance.Player.MaxHP;

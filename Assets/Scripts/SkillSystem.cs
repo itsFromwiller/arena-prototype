@@ -63,7 +63,15 @@ namespace Arena.Combat
             {
                 value = (skillData.SuccessRate * 100.00).ToString("N0");
             }
-            description = string.Format(skillData.Description, value);
+
+            if (skillData.RepeatTurns > 0)
+            {
+                description = string.Format(skillData.Description, value, skillData.RepeatTurns);
+            }
+            else
+            {
+                description = string.Format(skillData.Description, value);
+            }
             return description;
         }
     }

@@ -164,6 +164,10 @@ namespace Arena.Combat
             {
                 combatContext.DamageDealt = ReducedDamageFromDefense(CalculatedMAttackWithSkill(skillData), target.CalculatedMDefense());
             }
+            if (!combatContext.IsRepeatedAction && skillData.RepeatTurns > 0)
+            {
+                target.AddActiveSkillEntity(new SkillEntity(skillData, SkillLifetime.Turn, skillData.RepeatTurns, this == combatContext.Player));
+            }
             target.TakeDamage(this, combatContext);
         }
 

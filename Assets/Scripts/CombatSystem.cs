@@ -148,6 +148,11 @@ namespace Arena.Combat
             CombatLogView.gameObject.SafeSetActive(true);
             CombatSelectionView.gameObject.SafeSetActive(false);
             ResetContextForNewTurn();
+            CombatContext.Player.ProcessActiveSkillLifetimes(SkillLifetime.Turn);
+            // Have active skills do their effects when the player's
+            // turn starts.
+            ProcessActiveSkillEffects(CombatContext.Player);
+            ProcessActiveSkillEffects(CombatContext.Enemy);
         }
 
         public void ProcessPlayerAttack()
@@ -227,6 +232,10 @@ namespace Arena.Combat
                     else
                     {
                         CombatContext.HealingAmount = (int)(skillData.SkillPercentage * CombatContext.Player.MaxHP);
+                    }
+                    if (skillData.RepeatTurns > 0)
+                    {
+                        source.AddActiveSkillEntity(new SkillEntity(skillData, SkillLifetime.Turn, skillData.RepeatTurns, true));
                     }
                     source.Heal(CombatContext);
                     break;
@@ -331,10 +340,6 @@ namespace Arena.Combat
         {
             ResetContext();
             CombatContext.EnemyWasDead = CombatContext.Enemy.IsDead();
-            CombatContext.Player.ProcessActiveSkillLifetimes(SkillLifetime.Turn);
-            CombatContext.Enemy.ProcessActiveSkillLifetimes(SkillLifetime.Turn);
-            CombatContext.Enemy.ProcessActionCooldowns();
-            CombatContext.Enemy.ProcessBuffs();
             CombatContext.TurnCount++;
         }
 
@@ -347,11 +352,16 @@ namespace Arena.Combat
             CombatContext.SkillUsed = null;
             CombatContext.ItemUsed = null;
             CombatContext.EnemyActionUsed = null;
+            CombatContext.IsRepeatedAction = false;
         }
 
         public void ProcessEnemyTurn()
         {
             ResetContextForNewTurn();
+
+            CombatContext.Enemy.ProcessActiveSkillLifetimes(SkillLifetime.Turn);
+            CombatContext.Enemy.ProcessActionCooldowns();
+            CombatContext.Enemy.ProcessBuffs();
 
             ProcessStartTurnConditionalEnemyActions();
 
@@ -385,6 +395,39 @@ namespace Arena.Combat
                 {
                     GameEvents.EnemyMissed(CombatContext);
                 }
+            }
+        }
+
+        public void ProcessActiveSkillEffects(CombatEntity target)
+        {
+            if (target.IsDead())
+            {
+                return;
+            }
+
+            foreach (var activeSkill in target.ActiveSkills)
+            {
+                if (activeSkill.IsExpired)
+                {
+                    continue;
+                }
+                if (activeSkill.SkillData.RepeatTurns == 0)
+                {
+                    continue;
+                }
+                CombatContext.SkillUsed = activeSkill.SkillData;
+                CombatContext.IsRepeatedAction = true;
+                CombatEntity source = activeSkill.SourceIsPlayer ? CombatContext.Player : CombatContext.Enemy;
+                if (activeSkill.SkillData.SkillType == SkillType.DealDamage || activeSkill.SkillData.SkillType == SkillType.DealMDamage)
+                {
+                    source.AttackTargetWithSkill(target, activeSkill.SkillData, CombatContext);
+                }
+                else if (activeSkill.SkillData.SkillType == SkillType.Heal)
+                {
+                    CombatContext.HealingAmount = activeSkill.SkillData.SkillValue;
+                    source.Heal(CombatContext);
+                }
+                ResetContext();
             }
         }
 

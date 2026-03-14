@@ -20,6 +20,7 @@ namespace Arena.Combat
         public string SkillName;
         public int LifetimeValue = 0;
         public SkillLifetime SkillLifetime = SkillLifetime.Turn;
+        public bool SourceIsPlayer = false;
 
         public bool IsExpired { get; private set; }
 
@@ -28,13 +29,14 @@ namespace Arena.Combat
 
         }
 
-        public SkillEntity(SkillData skillData, SkillLifetime skillLifetime, int lifetimeValue)
+        public SkillEntity(SkillData skillData, SkillLifetime skillLifetime, int lifetimeValue, bool sourceIsPlayer)
         {
             SkillName = skillData.Name;
             SkillData = skillData;
             SkillLifetime = skillLifetime;
             LifetimeValue = lifetimeValue;
             IsExpired = false;
+            SourceIsPlayer = sourceIsPlayer;
         }
 
         public void TurnEnded()

@@ -103,7 +103,14 @@ public class CombatLogView : MonoBehaviour
     {
         if (combatContext.SkillUsed != null)
         {
-            AddToLog($"{BadColor}{combatContext.Enemy.Data.Name} cast {combatContext.SkillUsed.Name}, {combatContext.SkillUsed.CombatText} you for {combatContext.DamageDealt}</color>");
+            if (combatContext.IsRepeatedAction)
+            {
+                AddToLog($"{BadColor}You are {combatContext.SkillUsed.RepeatText} for {combatContext.DamageDealt}</color>");
+            }
+            else
+            {
+                AddToLog($"{BadColor}{combatContext.Enemy.Data.Name} cast {combatContext.SkillUsed.Name}, {combatContext.SkillUsed.CombatText} you for {combatContext.DamageDealt}</color>");
+            }
         }
         else if (combatContext.EnemyActionUsed != null)
         {
@@ -123,7 +130,14 @@ public class CombatLogView : MonoBehaviour
         }
         else if (combatContext.SkillUsed != null)
         {
-            AddToLog($"{GoodColor}You cast {combatContext.SkillUsed.Name}, {combatContext.SkillUsed.CombatText} you for {combatContext.HealingAmount}</color>");
+            if (combatContext.IsRepeatedAction)
+            {
+                AddToLog($"{GoodColor}You are {combatContext.SkillUsed.RepeatText} for {combatContext.HealingAmount}</color>");
+            }
+            else
+            {
+                AddToLog($"{GoodColor}You cast {combatContext.SkillUsed.Name}, {combatContext.SkillUsed.CombatText} you for {combatContext.HealingAmount}</color>");
+            }
         }
         else if (combatContext.ItemUsed != null)
         {
@@ -207,7 +221,14 @@ public class CombatLogView : MonoBehaviour
         }
         else if (combatContext.SkillUsed != null)
         {
-            AddToLog($"You cast {combatContext.SkillUsed.Name}, {combatContext.SkillUsed.CombatText} {combatContext.Enemy.Data.Name} for {combatContext.DamageDealt}");
+            if (combatContext.IsRepeatedAction)
+            {
+                AddToLog($"{combatContext.Enemy.Data.Name} is {combatContext.SkillUsed.RepeatText} for {combatContext.DamageDealt}");
+            }
+            else
+            {
+                AddToLog($"You cast {combatContext.SkillUsed.Name}, {combatContext.SkillUsed.CombatText} {combatContext.Enemy.Data.Name} for {combatContext.DamageDealt}");
+            }
         }
         else if (combatContext.ItemUsed != null)
         {
@@ -223,7 +244,14 @@ public class CombatLogView : MonoBehaviour
     {
         if (combatContext.SkillUsed != null)
         {
-            AddToLog($"{combatContext.Enemy.Data.Name} casts {combatContext.SkillUsed.Name}, {combatContext.SkillUsed.CombatText} it for {combatContext.HealingAmount}");
+            if (combatContext.IsRepeatedAction)
+            {
+                AddToLog($"{combatContext.Enemy.Data.Name} is {combatContext.SkillUsed.RepeatText} for {combatContext.HealingAmount}");
+            }
+            else
+            {
+                AddToLog($"{combatContext.Enemy.Data.Name} casts {combatContext.SkillUsed.Name}, {combatContext.SkillUsed.CombatText} it for {combatContext.HealingAmount}");
+            }
         }
         else if (combatContext.EnemyActionUsed != null)
         {
@@ -308,7 +336,7 @@ public class CombatLogView : MonoBehaviour
     private void OnEnterDungeonRoom(DungeonRoomEntity dungeonRoomEntity)
     {
         AddToLog(SeparatorText);
-        AddToLog($"<color=#0099AA>You entered room {dungeonRoomEntity.DungeonEntity.CurrentRoom} of floor {dungeonRoomEntity.DungeonEntity.CurrentFloor}</color>");
+        AddToLog($"<color=#0099AA>You entered {dungeonRoomEntity.DungeonEntity.DungeonInfoData.RoomName} {dungeonRoomEntity.DungeonEntity.CurrentRoom} of floor {dungeonRoomEntity.DungeonEntity.CurrentFloor}</color>");
     }
 
     private void OnEnemySpawned(EnemyEntity enemy)
