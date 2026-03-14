@@ -18,6 +18,7 @@ namespace Arena.Dungeon
         public GameObject DungeonView;
         public TextMeshProUGUI DungeonName;
         public TextMeshProUGUI DungeonInfo;
+        public TextMeshProUGUI DungeonMinLevel;
 
         private Dictionary<string, List<DungeonData>> dungeonDatabase = new Dictionary<string, List<DungeonData>>();
         private Dictionary<string, DungeonInfoData> dungeonInfoDatabase = new Dictionary<string, DungeonInfoData>();
@@ -73,6 +74,10 @@ namespace Arena.Dungeon
                 Debug.Log("Dungeon Json: " + json);
 #endif
                 DungeonEntity dungeon = JsonConvert.DeserializeObject<DungeonEntity>(json);
+                // Setup for data hookup
+                // Init for entity ref hookup
+                // sync
+                // SyncViewText();
                 return dungeon;
             }
             else
@@ -115,14 +120,20 @@ namespace Arena.Dungeon
             }
         }
 
+        void SyncViewText()
+        {
+            DungeonName.text = DungeonEntity.DungeonInfoData.Name;
+            DungeonInfo.text = DungeonEntity.DungeonInfoData.Description;
+            DungeonMinLevel.text = $"Min level: {DungeonEntity.DungeonInfoData.Level}";
+        }
+
         void OnEnterDungeon(string dungeonName)
         {
             // Populate Checkpoint Floors
             DungeonView.SafeSetActive(true);
             GenerateDungeon(dungeonName);
 
-            DungeonName.text = dungeonName;
-            DungeonInfo.text = DungeonEntity.DungeonInfoData.Description + $"\n\nMin level: {DungeonEntity.DungeonInfoData.Level}";
+            SyncViewText();
         }
 
         public void EnterDungeonFloor(int floor)
