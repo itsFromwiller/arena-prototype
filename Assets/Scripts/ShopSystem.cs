@@ -13,6 +13,7 @@ namespace Arena.Shop
 
         public GameObject ShopView;
         public TextMeshProUGUI ShopName;
+        public TextMeshProUGUI ShopInfo;
         public SelectionView SelectionView;
         public GameObject MainOptions;
         public GameObject BackButton;
@@ -47,13 +48,38 @@ namespace Arena.Shop
             ShopView.SafeSetActive(true);
             BackButton.SafeSetActive(false);
             ShowItemSelectionView(false);
-            if (shopType == "Bazaar")
+            switch (shopType)
             {
-                ShopName.text = shopType;
-            }
-            else
-            {
-                ShopName.text = $"{shopType} Shop";
+                case "Bazaar":
+                {
+                    ShopName.text = "Bazaar";
+                    ShopInfo.text = "An ever-changing market where new uncommon items appear after every dungeon run! You can also sell any item here, but it will be worth less than at a specialty shop.";
+                    break;
+                }
+                case "Weapons":
+                {
+                    ShopName.text = "Weapons Shop";
+                    ShopInfo.text = "An essential shop where you are able to buy and sell weapons ideal for physical attacks.";
+                    break;
+                }
+                case "Armor":
+                {
+                    ShopName.text = "Armor Shop";
+                    ShopInfo.text = "A trusty shop where all manner of Armor and Shields can be bought and sold.";
+                    break;
+                }
+                case "Magic":
+                {
+                    ShopName.text = "Magic Shop";
+                    ShopInfo.text = "A wonderous shop where magical weapons, items, and books can be bought and sold.";
+                    break;
+                }
+                case "Items":
+                {
+                    ShopName.text = "Item Shop";
+                    ShopInfo.text = "A peculiar shop that buys and sells various consumable items. They also purchase random materials dropped in a dungeon.";
+                    break;
+                }
             }
             CurrentGold.text = $"Gold: {PlayerSystem.Instance.Player.Gold}";
         }
