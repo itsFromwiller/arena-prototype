@@ -17,8 +17,10 @@ namespace Arena.Dungeon
 
         public GameObject DungeonView;
         public TextMeshProUGUI DungeonName;
+        public TextMeshProUGUI DungeonInfo;
 
         private Dictionary<string, List<DungeonData>> dungeonDatabase = new Dictionary<string, List<DungeonData>>();
+        private Dictionary<string, DungeonInfoData> dungeonInfoDatabase = new Dictionary<string, DungeonInfoData>();
         private DungeonEntity DungeonEntity;
 
         private void Awake()
@@ -91,6 +93,16 @@ namespace Arena.Dungeon
                 dungeonDatabase[dataItem.Name].Add(dataItem);
                 dataItem.SpawnType = EnumMap<SpawnType>.GetValue(dataItem.SpawnTypeName);
             }
+            var dungeonInfoData = JsonConvert.DeserializeObject<List<DungeonInfoData>>(data["DungeonInfo"]);
+            foreach (var dataItem in dungeonInfoData)
+            {
+                if (!dungeonInfoDatabase.TryAdd(dataItem.Name, dataItem))
+                {
+                    Debug.LogError($"Dungeon Info data couldn't be added, something already exists with its name: {dataItem.Name}");
+                    continue;
+                }
+            }
+
         }
 
         public void Init()
@@ -106,9 +118,11 @@ namespace Arena.Dungeon
         void OnEnterDungeon(string dungeonName)
         {
             // Populate Checkpoint Floors
-            DungeonName.text = dungeonName;
             DungeonView.SafeSetActive(true);
             GenerateDungeon(dungeonName);
+
+            DungeonName.text = dungeonName;
+            DungeonInfo.text = DungeonEntity.DungeonInfoData.Description + $"\n\nMin level: {DungeonEntity.DungeonInfoData.Level}";
         }
 
         public void EnterDungeonFloor(int floor)
@@ -153,7 +167,13 @@ namespace Arena.Dungeon
                 return;
             }
 
-            DungeonEntity = new DungeonEntity(dungeonName, dungeonDataList);
+            if (!dungeonInfoDatabase.TryGetValue(dungeonName, out var dungeonInfoData))
+            {
+                Debug.LogError("Dungeon Info doesn't exist: " + dungeonName);
+                return;
+            }
+
+            DungeonEntity = new DungeonEntity(dungeonName, dungeonDataList, dungeonInfoData);
             DungeonEntity.Generate();
         }
     }

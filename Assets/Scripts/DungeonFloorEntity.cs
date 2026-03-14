@@ -1,6 +1,7 @@
 ﻿// Uncomment to turn on debug lines
 // #define DEBUG_LOGS
 
+using Newtonsoft.Json;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -8,7 +9,10 @@ namespace Arena.Dungeon
 {
     public class DungeonFloorEntity
     {
+        // Will need to be set up after loading a save
+        [JsonIgnore]
         public DungeonEntity DungeonEntity;
+
         public int FloorNumber;
         public List<DungeonRoomEntity> Rooms = new List<DungeonRoomEntity>();
 

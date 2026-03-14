@@ -1,6 +1,7 @@
 ﻿// Uncomment to turn on debug lines
 // #define DEBUG_LOGS
 
+using Newtonsoft.Json;
 using System.Collections.Generic;
 
 namespace Arena.Dungeon
@@ -12,16 +13,28 @@ namespace Arena.Dungeon
         public int CurrentRoom = 1;
         public string DungeonName;
 
+        // These should all be regenerated when loading
+        // a save file. It's all based upon our saved Dungeon
+        // Name anyway.
+        [JsonIgnore]
         public List<DungeonData> EnemyData = new();
+        [JsonIgnore]
         public List<DungeonData> BossData = new();
+        [JsonIgnore]
         public List<DungeonData> RoomData = new();
+        [JsonIgnore]
         public List<DungeonData> RoomCountData = new();
+        [JsonIgnore]
         public DungeonData FloorData;
+        [JsonIgnore]
+        public DungeonInfoData DungeonInfoData;
+
         public Dictionary<string, int> SpawnCount = new();
 
-        public DungeonEntity(string dungeonName, List<DungeonData> dungeonDataList)
+        public DungeonEntity(string dungeonName, List<DungeonData> dungeonDataList, DungeonInfoData dungeonInfoData)
         {
             DungeonName = dungeonName;
+            DungeonInfoData = dungeonInfoData;
             foreach (var dungeonData in dungeonDataList)
             {
                 switch (dungeonData.SpawnType)

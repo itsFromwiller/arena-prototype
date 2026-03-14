@@ -3,14 +3,19 @@
 
 using Arena.Assets.Scripts.Core;
 using Arena.Enemies;
+using Newtonsoft.Json;
 using System.Collections.Generic;
 
 namespace Arena.Dungeon
 {
     public class DungeonRoomEntity
     {
+        // Will need to be set up upon loading a save game
+        [JsonIgnore]
         public DungeonEntity DungeonEntity;
+        [JsonIgnore]
         public DungeonFloorEntity FloorEntity;
+
         public int RoomNumber;
         public string RoomTypeName;
         public string SpawnName;
