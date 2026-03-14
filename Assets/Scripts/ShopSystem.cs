@@ -14,6 +14,7 @@ namespace Arena.Shop
         public GameObject ShopView;
         public TextMeshProUGUI ShopName;
         public TextMeshProUGUI ShopInfo;
+        public LogView LogView;
         public SelectionView SelectionView;
         public GameObject MainOptions;
         public GameObject BackButton;
@@ -49,6 +50,7 @@ namespace Arena.Shop
             ShopView.SafeSetActive(true);
             BackButton.SafeSetActive(false);
             ShowItemSelectionView(false);
+            LogView.Clear();
             switch (shopType)
             {
                 case "Bazaar":
@@ -82,7 +84,7 @@ namespace Arena.Shop
                     break;
                 }
             }
-            CurrentGold.text = $"Gold: {PlayerSystem.Instance.Player.Gold}";
+            CurrentGold.text = $"Your Gold: {PlayerSystem.Instance.Player.Gold}";
         }
 
         void OnEnterDungeonRoom(DungeonRoomEntity entity)
@@ -97,6 +99,7 @@ namespace Arena.Shop
             SelectionView.gameObject.SafeSetActive(isShown);
             MainOptions.SafeSetActive(!isShown);
             BackButton.SafeSetActive(isShown);
+            LogView.gameObject.SafeSetActive(isShown);
         }
 
         public void SelectBuyButton()
@@ -167,7 +170,7 @@ namespace Arena.Shop
             }
             if (CurrentBuyableItems.Count == 0)
             {
-                CurrentBuyableItems = ItemSystem.Instance.GetShopItemsFiltered(filterTypes, onlyMagicConsumables, onlyNonMagicConsumables, PlayerSystem.Instance.Player.Level + 5); ;
+                CurrentBuyableItems = ItemSystem.Instance.GetShopItemsFiltered(filterTypes, onlyMagicConsumables, onlyNonMagicConsumables, PlayerSystem.Instance.Player.Level + 5);
             }
             SelectionView.SetupItemDataView(CurrentBuyableItems, ItemSelectionItemView.ActionType.Buy, false, 1.0);
             ShowItemSelectionView(true);
@@ -250,15 +253,35 @@ namespace Arena.Shop
 
         public void SellPlayerItem(ItemDataSlot itemDataSlot)
         {
-            PlayerSystem.Instance.Player.SellItem(itemDataSlot.ItemData.Name, itemDataSlot.Count, itemDataSlot.ItemID, ShopSellPercentage);
-            CurrentGold.text = $"Gold: {PlayerSystem.Instance.Player.Gold}";
+            itemDataSlot.ItemData.IsStackable();
+            int gold = PlayerSystem.Instance.Player.SellItem(itemDataSlot.ItemData.Name, itemDataSlot.Count, itemDataSlot.ItemID, ShopSellPercentage);
+            if (itemDataSlot.ItemData.IsStackable())
+            {
+                LogView.AddMessage($"Sold {ItemSystem.Instance.BuildName(itemDataSlot)} [x{itemDataSlot.Count}] for <color=yellow>{gold}g</color>");
+            }
+            else
+            {
+                LogView.AddMessage($"Sold {ItemSystem.Instance.BuildName(itemDataSlot)} for <color=yellow>{gold}g</color>");
+            }
+            CurrentGold.text = $"Your Gold: {PlayerSystem.Instance.Player.Gold}";
         }
 
         public void BuyPlayerItem(ItemDataSlot itemDataSlot)
         {
-            PlayerSystem.Instance.Player.Gold -= itemDataSlot.ItemData.Cost * itemDataSlot.Count;
+            int goldCost = itemDataSlot.GetBuyCost() * itemDataSlot.Count;
+            PlayerSystem.Instance.Player.Gold -= goldCost;
             PlayerSystem.Instance.Player.GainItem(itemDataSlot.ItemData.Name, itemDataSlot.Count, itemDataSlot.Rarity, itemDataSlot.Random);
-            CurrentGold.text = $"Gold: {PlayerSystem.Instance.Player.Gold}";
+
+            if (itemDataSlot.ItemData.IsStackable())
+            {
+                LogView.AddMessage($"Bought {ItemSystem.Instance.BuildName(itemDataSlot)} [x{itemDataSlot.Count}] for <color=yellow>{goldCost}g</color>");
+            }
+            else
+            {
+                LogView.AddMessage($"Bought {ItemSystem.Instance.BuildName(itemDataSlot)} for <color=yellow>{goldCost}g</color>");
+            }
+
+            CurrentGold.text = $"Your Gold: {PlayerSystem.Instance.Player.Gold}";
         }
 
     }
