@@ -439,8 +439,9 @@ namespace Arena.Player
             }
         }
 
-        public void SellItem(string itemName, int count, int itemID, double shopSalePercentage)
+        public int SellItem(string itemName, int count, int itemID, double shopSalePercentage)
         {
+            int soldGold = 0;
             for (int i = ItemSlots.Count - 1; i >= 0; --i)
             {
                 ItemDataSlot itemSlot = ItemSlots[i];
@@ -452,24 +453,29 @@ namespace Arena.Player
                     // sell and return early
                     if (itemSlot.Count > count)
                     {
+                        int cost = costPerItem * count;
+                        soldGold += cost;
+                        Gold += soldGold;
                         itemSlot.Count -= count;
-                        Gold += costPerItem * count;
                         count = 0;
                     }
                     // Otherwise, we sell all of this slot,
                     // remove it, and keep going.
                     else
                     {
-                        Gold += costPerItem * itemSlot.Count;
+                        int cost = costPerItem * itemSlot.Count;
+                        soldGold += cost;
+                        Gold += soldGold;
                         count -= itemSlot.Count;
                         ItemSlots.RemoveAt(i);
                     }
                     if (count <= 0)
                     {
-                        return;
+                        break;
                     }
                 }
             }
+            return soldGold;
         }
 
         public void UnequipSlot(SlotType slotType)

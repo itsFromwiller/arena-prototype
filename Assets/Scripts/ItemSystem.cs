@@ -248,12 +248,20 @@ namespace Arena.Items
             }
             items.Sort((a, b) =>
             {
-                int priceComparison = a.ItemData.Cost * a.ItemData.BuyCount - b.ItemData.Cost * b.ItemData.BuyCount;
-                if (priceComparison == 0)
+                bool isAAWeapon = !(a.ItemData.ItemType == ItemType.Consumable || a.ItemData.ItemType == ItemType.Material);
+                bool isBAWeapon = !(b.ItemData.ItemType == ItemType.Consumable || b.ItemData.ItemType == ItemType.Material);
+
+                int typeComparison = isBAWeapon.CompareTo(isAAWeapon);
+                if (typeComparison == 0)
                 {
-                    return string.Compare(a.Name, b.Name);
+                    int priceComparison = a.ItemData.Cost * a.ItemData.BuyCount - b.ItemData.Cost * b.ItemData.BuyCount;
+                    if (priceComparison == 0)
+                    {
+                        return string.Compare(a.Name, b.Name);
+                    }
+                    return priceComparison;
                 }
-                return priceComparison;
+                return typeComparison;
             });
             return items;
         }
