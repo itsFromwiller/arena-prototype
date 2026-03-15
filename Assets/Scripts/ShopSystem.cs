@@ -57,7 +57,7 @@ namespace Arena.Shop
                 case "Bazaar":
                 {
                     ShopName.text = "Bazaar";
-                    ShopInfo.text = "An ever-changing market where new uncommon items appear after every dungeon run! You can also sell any item here, but it will be worth less than at a specialty shop.";
+                    ShopInfo.text = "An ever-changing market where new <color=green>Uncommon</color> items appear after every dungeon run! All items can be sold, but for less than a specialty shop.";
                     break;
                 }
                 case "Weapons":
