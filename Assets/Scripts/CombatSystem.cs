@@ -197,6 +197,8 @@ namespace Arena.Combat
             
             CombatSelectionView.gameObject.SafeSetActive(true);
             CombatLogView.gameObject.SafeSetActive(false);
+            EnemyCombatStatsView.gameObject.SafeSetActive(true);
+            TreasureRoomView.SafeSetActive(false);
         }
 
         public void ProcessPlayerSkill(SkillDataSlot skillDataSlot)
@@ -266,6 +268,8 @@ namespace Arena.Combat
 
             CombatSelectionView.gameObject.SafeSetActive(true);
             CombatLogView.gameObject.SafeSetActive(false);
+            EnemyCombatStatsView.gameObject.SafeSetActive(true);
+            TreasureRoomView.SafeSetActive(false);
         }
 
         public void ProcessPlayerItem(ItemDataSlot itemDataSlot)
@@ -820,6 +824,9 @@ namespace Arena.Combat
                     lootGold += lootResult.Gold;
                 }
             }
+            
+            totalEarnedGold += lootGold;
+            GameEvents.GetGold(lootGold);
 
             if (lootResultList.Count > 0)
             {
@@ -850,10 +857,13 @@ namespace Arena.Combat
 
         public void SelectContinue()
         {
+            EnemyCombatStatsView.gameObject.SafeSetActive(true);
+            CombatLogView.gameObject.SafeSetActive(true);
             CombatActionsView.SafeSetActive(true);
             AfterCombatActionsView.SafeSetActive(false);
             CombatSelectionView.gameObject.SafeSetActive(false);
             CombatLogView.gameObject.SafeSetActive(true);
+            TreasureRoomView.SafeSetActive(false);
 
             DungeonSystem.Instance.AdvanceRoom();
         }

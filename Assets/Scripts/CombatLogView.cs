@@ -322,6 +322,10 @@ public class CombatLogView : MonoBehaviour
     {
         foreach (var lootResult in loot)
         {
+            if (lootResult.ItemDataSlot == null)
+            {
+                continue;
+            }
             if (lootResult.Count > 1)
             {
                 AddToLog($"{GoldColor}You found {ItemSystem.Instance.BuildName(lootResult.ItemDataSlot)} x{lootResult.Count}!</color>");
@@ -336,7 +340,20 @@ public class CombatLogView : MonoBehaviour
     private void OnEnterDungeonRoom(DungeonRoomEntity dungeonRoomEntity)
     {
         AddToLog(SeparatorText);
-        AddToLog($"<color=#0099AA>You entered {dungeonRoomEntity.DungeonEntity.DungeonInfoData.RoomName} {dungeonRoomEntity.DungeonEntity.CurrentRoom} of floor {dungeonRoomEntity.DungeonEntity.CurrentFloor}</color>");
+        AddToLog($"<color=#0099AA>You entered {dungeonRoomEntity.DungeonEntity.DungeonInfoData.RoomName} {dungeonRoomEntity.DungeonEntity.CurrentRoom} of Floor {dungeonRoomEntity.DungeonEntity.CurrentFloor}</color>");
+        switch (dungeonRoomEntity.RoomTypeName)
+        {
+            case "Treasure":
+            {
+                AddToLog($"You discovered a Treasure Chest!");
+                break;
+            }
+            case "Fountain":
+            {
+                AddToLog($"You discovered a Magic Fountain!");
+                break;
+            }
+        }
     }
 
     private void OnEnemySpawned(EnemyEntity enemy)

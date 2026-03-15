@@ -160,6 +160,10 @@ namespace Arena.Player
         {
             foreach (var loot in lootResults)
             {
+                if (loot.ItemDataSlot == null)
+                {
+                    continue;
+                }
                 Player.GainItem(loot.ItemDataSlot.ItemData.Name, loot.Count,
                     loot.ItemDataSlot.RarityModifierData != null ? loot.ItemDataSlot.RarityModifierData.Name : null,
                     loot.ItemDataSlot.RandomModifierData != null ? loot.ItemDataSlot.RandomModifierData.Name : null);

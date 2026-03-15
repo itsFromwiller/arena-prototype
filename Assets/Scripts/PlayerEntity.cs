@@ -77,7 +77,6 @@ namespace Arena.Player
             EquipItem("Bone Axe", weaponID);
             EquipItem("Bone Shield", shieldID);
             EquipItem("Leaf Cape", capeID);
-            DungeonsUnlocked.Add("Sewer");
         }
 
         public override void Init()
@@ -99,7 +98,6 @@ namespace Arena.Player
                 itemDataSlot.RarityModifierData = ItemSystem.Instance.GetRarityModifier(itemDataSlot.Rarity);
                 itemDataSlot.RandomModifierData = ItemSystem.Instance.GetRandomModifier(itemDataSlot.Random);
             }
-            DungeonsUnlocked.Clear();
         }
 
         public bool HasUnlockedDungeon(string dungeonName)
