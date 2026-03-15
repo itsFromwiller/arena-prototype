@@ -408,6 +408,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6316438495371242544}
   - component: {fileID: 5925092600247223138}
+  - component: {fileID: 9078628240457530423}
   m_Layer: 5
   m_Name: WorldView
   m_TagString: Untagged
@@ -464,6 +465,20 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!114 &9078628240457530423
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9088448342813842236}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0b5b93c12353cb54f82dabbf83d794c0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Arena::Arena.Core.GameObjectPoolManager
+  TemplateGameObject: {fileID: 1170788192888922110}
+  InactivePool: []
 --- !u!1001 &2378937364491366312
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -989,6 +1004,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 192a055aa8478d24d8e84ac059896280, type: 3}
+--- !u!1 &1170788192888922110 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4822082491977470831, guid: 192a055aa8478d24d8e84ac059896280, type: 3}
+  m_PrefabInstance: {fileID: 5968399610202229905}
+  m_PrefabAsset: {fileID: 0}
 --- !u!224 &7152269320779224461 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 3573031119502137628, guid: 192a055aa8478d24d8e84ac059896280, type: 3}

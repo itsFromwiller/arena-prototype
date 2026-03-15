@@ -1,10 +1,20 @@
+using Arena.Core;
+using Arena.Dungeon;
+using Arena.Player;
+using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
+using UnityEngine.UI;
 
 namespace Arena.World
 {
     public class WorldSystem : MonoBehaviour
     {
         public GameObject WorldView;
+        public GameObjectPoolManager DungeonButtonPoolManager;
+        public Transform DungeonGridContent;
+        
+        private List<GameObject> activeButtons = new();
 
         private void Awake()
         {
@@ -24,13 +34,33 @@ namespace Arena.World
         void OnEnterWorld()
         {
             // Populate dungeons and town
+            foreach(var activeButton in activeButtons)
+            {
+                DungeonButtonPoolManager.ReturnToPool(activeButton);
+            }
+            activeButtons.Clear();
+
+            foreach (var dungeonName in PlayerSystem.Instance.Player.DungeonsUnlocked)
+            {
+                var dungeonInfo = DungeonSystem.Instance.GetDungeonInfo(dungeonName);
+                var dungeonButton = DungeonButtonPoolManager.GetPooledObject<Button>();
+
+                activeButtons.Add(dungeonButton.gameObject);
+
+                dungeonButton.gameObject.transform.SetParent(DungeonGridContent);
+                dungeonButton.gameObject.GetComponentInChildren<TextMeshProUGUI>().text = dungeonInfo.Name;
+                dungeonButton.onClick.RemoveAllListeners();
+                dungeonButton.onClick.AddListener(() => OnDungeonButtonClicked(dungeonInfo.Name));
+                dungeonButton.gameObject.SafeSetActive(true);
+            }
+
             WorldView.SafeSetActive(true);
         }
 
-        public void SelectDungeonButton()
+        void OnDungeonButtonClicked(string dungeonName)
         {
             WorldView.SafeSetActive(false);
-            GameEvents.EnterDungeon("Sewer");
+            GameEvents.EnterDungeon(dungeonName);
         }
 
         public void SelectTownButton()
