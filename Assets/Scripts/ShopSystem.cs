@@ -18,6 +18,7 @@ namespace Arena.Shop
         public SelectionView SelectionView;
         public GameObject MainOptions;
         public GameObject BackButton;
+        public TextMeshProUGUI BackButtonText;
         public TextMeshProUGUI CurrentGold;
         public int ItemCountInBazaar = 10;
         private string ShopType;
@@ -174,6 +175,7 @@ namespace Arena.Shop
             }
             SelectionView.SetupItemDataView(CurrentBuyableItems, ItemSelectionItemView.ActionType.Buy, false, 1.0);
             ShowItemSelectionView(true);
+            BackButtonText.text = "Stop Buying";
         }
 
         public void SelectSellButton()
@@ -238,6 +240,7 @@ namespace Arena.Shop
             CurrentSellableItems = PlayerSystem.Instance.Player.GetCurrentItemsFiltered(filterTypes, onlyMagicConsumables, onlyNonMagicConsumables);
             SelectionView.SetupItemDataView(CurrentSellableItems, ItemSelectionItemView.ActionType.Sell, false, ShopSellPercentage);
             ShowItemSelectionView(true);
+            BackButtonText.text = "Stop Selling";
         }
 
         public void SelectBackButton()

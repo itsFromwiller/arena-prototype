@@ -606,7 +606,7 @@ MonoBehaviour:
     m_Left: 0
     m_Right: 0
     m_Top: 0
-    m_Bottom: 0
+    m_Bottom: 144
   m_ChildAlignment: 4
   m_StartCorner: 0
   m_StartAxis: 0
@@ -2239,7 +2239,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6546045940301380714, guid: 7d281cf0f917fa64c9df4f27e04e4599, type: 3}
       propertyPath: m_Name
-      value: SelectionView
+      value: BookSelectionView
       objectReference: {fileID: 0}
     - target: {fileID: 6546045940301380714, guid: 7d281cf0f917fa64c9df4f27e04e4599, type: 3}
       propertyPath: m_IsActive
@@ -2920,23 +2920,23 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3573031119502137628, guid: 192a055aa8478d24d8e84ac059896280, type: 3}
       propertyPath: m_Pivot.y
-      value: 0.5
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3573031119502137628, guid: 192a055aa8478d24d8e84ac059896280, type: 3}
       propertyPath: m_AnchorMax.x
-      value: 0
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 3573031119502137628, guid: 192a055aa8478d24d8e84ac059896280, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 3573031119502137628, guid: 192a055aa8478d24d8e84ac059896280, type: 3}
-      propertyPath: m_AnchorMin.x
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3573031119502137628, guid: 192a055aa8478d24d8e84ac059896280, type: 3}
+      propertyPath: m_AnchorMin.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 3573031119502137628, guid: 192a055aa8478d24d8e84ac059896280, type: 3}
       propertyPath: m_AnchorMin.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3573031119502137628, guid: 192a055aa8478d24d8e84ac059896280, type: 3}
       propertyPath: m_SizeDelta.x
@@ -2944,7 +2944,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3573031119502137628, guid: 192a055aa8478d24d8e84ac059896280, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 300
+      value: 128
       objectReference: {fileID: 0}
     - target: {fileID: 3573031119502137628, guid: 192a055aa8478d24d8e84ac059896280, type: 3}
       propertyPath: m_LocalPosition.x
@@ -2976,11 +2976,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3573031119502137628, guid: 192a055aa8478d24d8e84ac059896280, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 827.2743
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3573031119502137628, guid: 192a055aa8478d24d8e84ac059896280, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -803.00006
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3573031119502137628, guid: 192a055aa8478d24d8e84ac059896280, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -2996,7 +2996,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4505489351202586244, guid: 192a055aa8478d24d8e84ac059896280, type: 3}
       propertyPath: m_text
-      value: Leave Inn
+      value: Return to Town
       objectReference: {fileID: 0}
     - target: {fileID: 4822082491977470831, guid: 192a055aa8478d24d8e84ac059896280, type: 3}
       propertyPath: m_Name
@@ -3005,8 +3005,36 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 4822082491977470831, guid: 192a055aa8478d24d8e84ac059896280, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3587603949729853345}
   m_SourcePrefab: {fileID: 100100000, guid: 192a055aa8478d24d8e84ac059896280, type: 3}
+--- !u!1 &1130838378412807761 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4822082491977470831, guid: 192a055aa8478d24d8e84ac059896280, type: 3}
+  m_PrefabInstance: {fileID: 5574033544203601214}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &3587603949729853345
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1130838378412807761}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 306cc8c2b49d7114eaa3623786fc2126, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.LayoutElement
+  m_IgnoreLayout: 1
+  m_MinWidth: -1
+  m_MinHeight: -1
+  m_PreferredWidth: -1
+  m_PreferredHeight: -1
+  m_FlexibleWidth: -1
+  m_FlexibleHeight: -1
+  m_LayoutPriority: 1
 --- !u!224 &8993412643813940258 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 3573031119502137628, guid: 192a055aa8478d24d8e84ac059896280, type: 3}
@@ -3558,7 +3586,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6546045940301380714, guid: 7d281cf0f917fa64c9df4f27e04e4599, type: 3}
       propertyPath: m_Name
-      value: SelectionView
+      value: EquipmentSelectionView
       objectReference: {fileID: 0}
     - target: {fileID: 6546045940301380714, guid: 7d281cf0f917fa64c9df4f27e04e4599, type: 3}
       propertyPath: m_IsActive
