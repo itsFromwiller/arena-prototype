@@ -192,6 +192,11 @@ namespace Arena.Dungeon
             GameEvents.EnterWorld();
         }
 
+        public List<LootTableData> GetTreasureRoomLootTableForCurrentDungeon()
+        {
+            return LootSystem.Instance.GetLootTables($"{DungeonEntity.DungeonName}TreasureRoom");
+        }
+
         public void FinishDungeon()
         {
             GameEvents.FinishDungeon();

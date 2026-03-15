@@ -33,6 +33,9 @@ namespace Arena.Combat
         public CombatStatsView EnemyCombatStatsView;
         public CombatStatsView PlayerCombatStatsView;
         public PlayerStatsView PlayerStatsView;
+        public GameObject TreasureRoomView;
+        public GameObject TreasureRoomChestButton;
+        public TextMeshProUGUI TreasureRoomResultText;
 
         private CombatContext CombatContext = new CombatContext();
 
@@ -63,6 +66,7 @@ namespace Arena.Combat
             LevelUpView.SafeSetActive(false);
             EnemyCombatStatsView.gameObject.SafeSetActive(false);
             PlayerCombatStatsView.gameObject.SafeSetActive(false);
+            TreasureRoomView.SafeSetActive(false);
         }
 
         private void OnEnable()
@@ -72,6 +76,7 @@ namespace Arena.Combat
             GameEvents.OnStartCombat += HandleStartCombat;
             GameEvents.OnEnterDungeon += HandleEnterDungeon;
             GameEvents.OnFinishDungeon += HandleFinishDungeon;
+            GameEvents.OnEnterDungeonRoom += HandleEnterDungeonRoom;
         }
 
         private void OnDisable()
@@ -81,6 +86,7 @@ namespace Arena.Combat
             GameEvents.OnStartCombat -= HandleStartCombat;
             GameEvents.OnEnterDungeon -= HandleEnterDungeon;
             GameEvents.OnFinishDungeon -= HandleFinishDungeon;
+            GameEvents.OnEnterDungeonRoom -= HandleEnterDungeonRoom;
         }
 
         public void HandleEnterDungeon(string dungeonName)
@@ -98,6 +104,7 @@ namespace Arena.Combat
             LevelUpView.SafeSetActive(false);
             EnemyCombatStatsView.gameObject.SafeSetActive(false);
             PlayerCombatStatsView.gameObject.SafeSetActive(false);
+            TreasureRoomView.SafeSetActive(false);
         }
 
         void HandleEnemySpawned(EnemyEntity enemyEntity)
@@ -116,19 +123,28 @@ namespace Arena.Combat
             PlayerCombatStatsView.gameObject.SafeSetActive(true);
             CombatLogView.gameObject.SafeSetActive(true);
             CombatActionsView.SafeSetActive(true);
-            //            CombatView.SafeSetActive(true);
-            //            SummaryView.SafeSetActive(false);
             hasLeftBattle = false;
+        }
+
+        void HandleEnterDungeonRoom(DungeonRoomEntity dungeonRoomEntity)
+        {
+            switch (dungeonRoomEntity.RoomTypeName)
+            {
+                case "Treasure":
+                {
+                    ShowTreasureRoom();
+                    break;
+                }
+                case "Fountain":
+                {
+//                    ShowFountainRoom();
+                    break;
+                }
+            }
         }
 
         void HandleStartCombat()
         {
-            //            CombatActionsView.SafeSetActive(true);
-            //            AfterCombatActionsView.SafeSetActive(false);
-            //            CombatSelectionView.gameObject.SafeSetActive(false);
-            //            SummaryView.SafeSetActive(false);
-            //            CombatLogView.gameObject.SafeSetActive(true);
-
             ProcessStartCombatConditionalEnemyActions();
 
             if (CombatContext.Enemy.GetInitiative() > CombatContext.Player.GetInitiative())
@@ -570,15 +586,49 @@ namespace Arena.Combat
         {
             GameEvents.EnemyKilled(CombatContext);
 
-            int goldLoot = CombatContext.Enemy.Data.Loot + UnityEngine.Random.Range(0, 3);
-            totalEarnedGold += goldLoot;
-            GameEvents.GetGold(goldLoot);
+            var lootFound = LootSystem.Instance.RollLoot(CombatContext.Enemy.Data.LootTableDataList, CombatContext.Player.Level + 5, false);
+            ProcessLoot(lootFound);
 
-            var lootFound = LootSystem.Instance.RollLoot(CombatContext.Enemy.Data.LootTableDataList, CombatContext.Player.Level + 5);
+            int lootGold = 0;
+            foreach (var lootResult in lootFound)
+            {
+                if (lootResult.Gold > 0)
+                {
+                    lootGold += lootResult.Gold;
+                }
+            }
+
+            int enemyGold = CombatContext.Enemy.Data.Loot + UnityEngine.Random.Range(0, 3);
+            totalEarnedGold += (enemyGold + lootGold);
+            GameEvents.GetGold(enemyGold);
+
+            hasLeftBattle = true;
+
+            CombatContext.Player.ProcessActiveSkillLifetimes(SkillLifetime.Battle);
+
+            PlayerSystem.Instance.Player.EarnXP(CombatContext.Enemy.Data.XP);
+            totalEarnedXP += CombatContext.Enemy.Data.XP;
+            if (PlayerSystem.Instance.Player.StatPointsRemaining > 0)
+            {
+                PlayerLeveledUp();
+            }
+            else
+            {
+                PlayerFinishedCombat();
+            }
+        }
+
+        private void ProcessLoot(List<LootResult> lootFound)
+        {
             if (lootFound != null && lootFound.Count > 0)
             {
                 foreach (var loot in lootFound)
                 {
+                    // Gold loot doesn't have items
+                    if (loot.ItemDataSlot == null)
+                    {
+                        continue;
+                    }
                     if (!loot.ItemDataSlot.ItemData.IsStackable())
                     {
                         lootEarned.Add(loot);
@@ -601,23 +651,9 @@ namespace Arena.Combat
                 }
                 GameEvents.GetLoot(lootFound);
             }
-            hasLeftBattle = true;
-
-            CombatContext.Player.ProcessActiveSkillLifetimes(SkillLifetime.Battle);
-
-            PlayerSystem.Instance.Player.EarnXP(CombatContext.Enemy.Data.XP);
-            totalEarnedXP += CombatContext.Enemy.Data.XP;
-            if (PlayerSystem.Instance.Player.StatPointsRemaining > 0)
-            {
-                PlayerLeveledUp();
-            }
-            else
-            {
-                PlayerFinishedCombat();
-            }
         }
 
-        IEnumerator DisableThenReenableButtons()
+        private void DisableButtons()
         {
             var afterCombatButtons = AfterCombatActionsView.GetComponentsInChildren<Button>();
             var combatButtons = CombatActionsView.GetComponentsInChildren<Button>();
@@ -629,9 +665,12 @@ namespace Arena.Combat
             {
                 button.interactable = false;
             }
+        }
 
-            yield return new WaitForSeconds(0.25f);
-
+        private void EnableButtons()
+        {
+            var afterCombatButtons = AfterCombatActionsView.GetComponentsInChildren<Button>();
+            var combatButtons = CombatActionsView.GetComponentsInChildren<Button>();
             foreach (var button in afterCombatButtons)
             {
                 button.interactable = true;
@@ -640,6 +679,15 @@ namespace Arena.Combat
             {
                 button.interactable = true;
             }
+        }
+
+        IEnumerator DisableThenReenableButtons()
+        {
+            DisableButtons();
+
+            yield return new WaitForSeconds(0.25f);
+
+            EnableButtons();
         }
 
         public void KillPlayer()
@@ -735,6 +783,70 @@ namespace Arena.Combat
 
             CombatContext.Player.ProcessActiveSkillLifetimes(SkillLifetime.Dungeon);
         }
+
+        public void ShowTreasureRoom()
+        {
+            EnemyCombatStatsView.gameObject.SafeSetActive(false);
+            CombatLogView.gameObject.SafeSetActive(false);
+            CombatActionsView.SafeSetActive(false);
+            AfterCombatActionsView.SafeSetActive(true);
+            AfterCombatContinueButton.SafeSetActive(true);
+            AfterCombatItemButton.SafeSetActive(true);
+            AfterCombatSkillButton.SafeSetActive(true);
+            
+            DisableButtons();
+
+            TreasureRoomView.SafeSetActive(true);
+            TreasureRoomChestButton.SafeSetActive(true);
+            TreasureRoomResultText.gameObject.SafeSetActive(false);
+        }
+
+        public void SelectTreasureChest()
+        {
+            TreasureRoomChestButton.SafeSetActive(false);
+            TreasureRoomResultText.gameObject.SafeSetActive(true);
+            TreasureRoomResultText.text = "";
+            
+            var treasureRoomLootTables = DungeonSystem.Instance.GetTreasureRoomLootTableForCurrentDungeon();
+            var lootResultList = LootSystem.Instance.RollLoot(treasureRoomLootTables, CombatContext.Player.Level + 5, false);
+
+            ProcessLoot(lootResultList);
+
+            int lootGold = 0;
+            foreach (var lootResult in lootResultList)
+            {
+                if (lootResult.Gold > 0)
+                {
+                    lootGold += lootResult.Gold;
+                }
+            }
+
+            if (lootResultList.Count > 0)
+            {
+                StringBuilder sb = new StringBuilder();
+                sb.AppendLine("Found:");
+                sb.AppendLine();
+                foreach (var item in lootResultList)
+                {
+                    if (item.Gold > 0)
+                    {
+                        sb.AppendLine($"<color=yellow>{item.Gold} Gold</color>");
+                    }
+                    else if (item.Count > 0)
+                    {
+                        sb.AppendLine($"{ItemSystem.Instance.BuildName(item.ItemDataSlot)} x{item.Count}");
+                    }
+                    else
+                    {
+                        sb.AppendLine(ItemSystem.Instance.BuildName(item.ItemDataSlot));
+                    }
+                }
+                TreasureRoomResultText.text = sb.ToString();
+            }
+
+            EnableButtons();
+        }
+
 
         public void SelectContinue()
         {

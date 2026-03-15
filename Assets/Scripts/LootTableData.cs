@@ -11,6 +11,8 @@ namespace Arena.Loot
         Armor,
         RandomWeapon,
         RandomArmor,
+        GuaranteedLootTable,
+        Gold,
     }
 
     public class LootTableData
@@ -20,6 +22,7 @@ namespace Arena.Loot
         public string Weapon;
         public string Armor;
         public string Special;
+        public string SpecialValue;
         public LootType LootType; // Parsed at runtime, not from data
         public double Odds;
         public int LimitPerDrop;

@@ -111,7 +111,7 @@ namespace Arena.Loot
             return new List<LootTableData>();
         }
 
-        public List<LootResult> RollLoot(List<LootTableData> lootTable, int maxLevel)
+        public List<LootResult> RollLoot(List<LootTableData> lootTable, int maxLevel, bool guaranteedPull)
         {
             List<LootResult> results = new List<LootResult>();
             Dictionary<string, int> dropCount = new Dictionary<string, int>();
@@ -183,6 +183,44 @@ namespace Arena.Loot
                         }
                         break;
                     }
+                    case LootType.GuaranteedLootTable:
+                    {
+                        // We grab all the loot options in the loot table specified
+                        // and perform a weighted bucket pull. However, we assign a
+                        // weight per loot table option based upon its odds, so rare
+                        // items still stay rare.
+                        var guaranteedlootTable = GetLootTables(lootTableData.SpecialValue);
+                        var lootBucket = new WeightedBucket<LootTableData>();
+                        foreach(var loot in guaranteedlootTable)
+                        {
+                            lootBucket.AddItem(loot, (int) (loot.Odds * 100));
+                        }
+                        var lootTableResult = lootBucket.GetRandomItem();
+                        var lootResult = RollLoot(new List<LootTableData>() { lootTableResult }, maxLevel, true);
+                        results.AddRange(lootResult);
+                        continue;
+                    }
+                    case LootType.Gold:
+                    {
+                        double roll = Random.Range(0.0f, 1.0f);
+                        if (roll <= lootTableData.Odds || guaranteedPull)
+                        {
+                            if (int.TryParse(lootTableData.SpecialValue, out int gold))
+                            {
+                                // Gold can be 10% less or more than the value earned,
+                                // to make it look better.
+                                int goldMin = (int)(gold * 0.9);
+                                int extraGold = (gold - goldMin) * 2;
+                                int randomGold = Random.Range(0, extraGold) + 1;
+                                gold = goldMin + randomGold;
+
+                                var lootResult = new LootResult();
+                                lootResult.Gold = gold;
+                                results.Add(lootResult);
+                            }
+                        }
+                        continue;
+                    }
                 }
 #if DEBUG_LOGS
                 Debug.LogError($"LootSystem: Possible Reward = {possibleReward.Name}");
@@ -194,7 +232,7 @@ namespace Arena.Loot
 #if DEBUG_LOGS
                     Debug.LogError($"LootSystem: Rolled a {roll} and it needs to be less than {lootTableData.Odds}");
 #endif
-                    if (roll <= lootTableData.Odds)
+                    if (roll <= lootTableData.Odds || guaranteedPull)
                     {
 #if DEBUG_LOGS
                         Debug.LogError($"LootSystem: Got it!");

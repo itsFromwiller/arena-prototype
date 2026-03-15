@@ -8,5 +8,6 @@ namespace Arena.Loot
     {
         public ItemDataSlot ItemDataSlot;
         public int Count;
+        public int Gold;
     }
 }
