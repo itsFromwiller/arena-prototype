@@ -6,6 +6,7 @@ using Arena.Shop;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using Arena.Core;
 
 namespace Arena
 {
@@ -15,11 +16,10 @@ namespace Arena
         public ItemSelectionItemView ItemViewTemplate;
         public SkillSelectionItemView SkillViewTemplate;
         public ScrollRect ScrollView;
-
+        public GameObjectPoolManager ItemViewPoolManager;
+        public GameObjectPoolManager SkillViewPoolManager;
         public Dictionary<int, ItemSelectionItemView> ItemsInView = new Dictionary<int, ItemSelectionItemView>();
         public Dictionary<int, SkillSelectionItemView> SkillsInView = new Dictionary<int, SkillSelectionItemView>();
-        public List<ItemSelectionItemView> inactiveItemPool = new List<ItemSelectionItemView>();
-        public List<SkillSelectionItemView> inactiveSkillPool = new List<SkillSelectionItemView>();
 
         public enum ViewType
         {
@@ -34,12 +34,6 @@ namespace Arena
         private float LastItemViewPosition = 1;
         private float LastSkillViewPosition = 1;
 
-        private void Awake()
-        {
-            ItemViewTemplate.gameObject.SafeSetActive(false);
-            SkillViewTemplate.gameObject.SafeSetActive(false);
-        }
-
         private void HideViews()
         {
             if (CurrentViewType == ViewType.Items)
@@ -53,23 +47,14 @@ namespace Arena
 
             foreach (var view in SkillsInView.Values)
             {
-                view.transform.SetParent(transform);
-                view.gameObject.SafeSetActive(false);
-                inactiveSkillPool.Add(view);
+                SkillViewPoolManager.ReturnToPool(view.gameObject);
             }
             SkillsInView.Clear();
             foreach (var view in ItemsInView.Values)
             {
-                ReturnItemViewToPool(view);
+                ItemViewPoolManager.ReturnToPool(view.gameObject);
             }
             ItemsInView.Clear();
-        }
-
-        public void ReturnItemViewToPool(ItemSelectionItemView itemView)
-        {
-            itemView.transform.SetParent(transform);
-            itemView.gameObject.SafeSetActive(false);
-            inactiveItemPool.Add(itemView);
         }
 
         public void SetupItemDataViewForEquipment(List<ItemDataSlot> itemDataSlots, SlotType equipmentSlotType, ItemSelectionItemView.ActionType selectionActionType, bool keepScrollPosition)
@@ -87,17 +72,16 @@ namespace Arena
             for (int i = 0; i < itemDataSlots.Count; ++i)
             {
                 var itemDataSlot = itemDataSlots[i];
+
                 ItemSelectionItemView itemView;
-                if (inactiveItemPool.Count > 0)
+                GameObject pooledObject = ItemViewPoolManager.GetPooledObject();
+                pooledObject.transform.SetParent(ScrollView.content);
+                if (!pooledObject.TryGetComponent(out itemView))
                 {
-                    itemView = inactiveItemPool[0];
-                    inactiveItemPool.RemoveAt(0);
-                    itemView.transform.SetParent(ScrollView.content);
+                    Debug.LogError("SelectionView not set up correctly, missing ItemSelectionItemView in its template");
+                    break;
                 }
-                else
-                {
-                    itemView = Instantiate<ItemSelectionItemView>(ItemViewTemplate, ScrollView.content);
-                }
+
                 ItemsInView.Add(i, itemView);
                 itemView.Setup(this, i, itemDataSlot, selectionActionType, shopSellPercentage);
                 itemView.gameObject.SafeSetActive(true);
@@ -115,21 +99,18 @@ namespace Arena
             for (int i = 0; i < skillDataSlots.Count; ++i)
             {
                 var skillDataSlot = skillDataSlots[i];
-                SkillSelectionItemView skillView;
-                if (inactiveSkillPool.Count > 0)
+                
+                var skillView = SkillViewPoolManager.GetPooledObject<SkillSelectionItemView>();
+                if (skillView == null)
                 {
-                    skillView = inactiveSkillPool[0];
-                    inactiveSkillPool.RemoveAt(0);
-                    skillView.transform.SetParent(ScrollView.content);
-                }
-                else
-                {
-                    skillView = Instantiate<SkillSelectionItemView>(SkillViewTemplate, ScrollView.content);
+                    // We have a bad template, can't do much now.
+                    break;
                 }
                 SkillsInView.Add(i, skillView);
+                skillView.gameObject.transform.SetParent(ScrollView.content);
                 skillView.Setup(this, i, currentMP, skillDataSlot, selectionActionType);
-                skillView.Background.color = i % 2 == 0 ? new Color(0,0,0,0) : new Color(0,0,0,0.1f);
                 skillView.gameObject.SafeSetActive(true);
+                skillView.Background.color = i % 2 == 0 ? new Color(0,0,0,0) : new Color(0,0,0,0.1f);
             }
 
             LayoutRebuilder.ForceRebuildLayoutImmediate(ScrollView.content);
@@ -145,7 +126,7 @@ namespace Arena
             if (ItemsInView.Remove(id, out var view))
             {
                 ShopSystem.Instance.SellPlayerItem(view.ItemDataSlot);
-                ReturnItemViewToPool(view);
+                ItemViewPoolManager.ReturnToPool(view.gameObject);
             }
         }
 

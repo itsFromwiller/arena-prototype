@@ -1416,6 +1416,8 @@ GameObject:
   - component: {fileID: 6363810456179327720}
   - component: {fileID: 2046569842776242823}
   - component: {fileID: 2049925667166186498}
+  - component: {fileID: 617039297845973809}
+  - component: {fileID: 2704341859482905836}
   m_Layer: 5
   m_Name: SelectionView
   m_TagString: Untagged
@@ -1496,8 +1498,36 @@ MonoBehaviour:
   ItemViewTemplate: {fileID: 5257215719609289399}
   SkillViewTemplate: {fileID: 8051476703545825273}
   ScrollView: {fileID: 796865020666846840}
-  inactiveItemPool: []
-  inactiveSkillPool: []
+  ItemViewPoolManager: {fileID: 2704341859482905836}
+  SkillViewPoolManager: {fileID: 617039297845973809}
+--- !u!114 &617039297845973809
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6546045940301380714}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0b5b93c12353cb54f82dabbf83d794c0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Arena::Arena.Core.GameObjectPoolManager
+  TemplateGameObject: {fileID: 8307079928538544403}
+  InactivePool: []
+--- !u!114 &2704341859482905836
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6546045940301380714}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0b5b93c12353cb54f82dabbf83d794c0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Arena::Arena.Core.GameObjectPoolManager
+  TemplateGameObject: {fileID: 3327002907239277567}
+  InactivePool: []
 --- !u!1 &6876942387610873409
 GameObject:
   m_ObjectHideFlags: 0
