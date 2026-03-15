@@ -305,13 +305,14 @@ GameObject:
   m_Component:
   - component: {fileID: 8931783579323431947}
   - component: {fileID: 3315383914932797454}
+  - component: {fileID: 6444139084358345326}
   m_Layer: 5
   m_Name: DungeonView
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &8931783579323431947
 RectTransform:
   m_ObjectHideFlags: 0
@@ -361,6 +362,20 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!114 &6444139084358345326
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5866474722644780100}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0b5b93c12353cb54f82dabbf83d794c0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Arena::Arena.Core.GameObjectPoolManager
+  TemplateGameObject: {fileID: 4762763238881789654}
+  InactivePool: []
 --- !u!1 &5897225113266858013
 GameObject:
   m_ObjectHideFlags: 0
@@ -611,7 +626,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 290024339045639903, guid: 192a055aa8478d24d8e84ac059896280, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
-      value: 2
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 290024339045639903, guid: 192a055aa8478d24d8e84ac059896280, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
@@ -751,11 +766,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4505489351202586244, guid: 192a055aa8478d24d8e84ac059896280, type: 3}
       propertyPath: m_text
-      value: Floor 1
+      value: Floor Number
       objectReference: {fileID: 0}
     - target: {fileID: 4822082491977470831, guid: 192a055aa8478d24d8e84ac059896280, type: 3}
       propertyPath: m_Name
-      value: SewersButton
+      value: FloorButtonTemplate
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -765,6 +780,11 @@ PrefabInstance:
 --- !u!224 &3559591153742597285 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 3573031119502137628, guid: 192a055aa8478d24d8e84ac059896280, type: 3}
+  m_PrefabInstance: {fileID: 68611261296022969}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &4762763238881789654 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4822082491977470831, guid: 192a055aa8478d24d8e84ac059896280, type: 3}
   m_PrefabInstance: {fileID: 68611261296022969}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &3652119308074925336

@@ -3,11 +3,13 @@
 
 using Arena.Core;
 using Arena.Enemies;
+using Arena.Loot;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.IO;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Arena.Dungeon
 {
@@ -19,10 +21,14 @@ namespace Arena.Dungeon
         public TextMeshProUGUI DungeonName;
         public TextMeshProUGUI DungeonInfo;
         public TextMeshProUGUI DungeonMinLevel;
+        public GameObjectPoolManager FloorButtonPoolManager;
+        public Transform DungeonGridContent;
 
         private Dictionary<string, List<DungeonData>> dungeonDatabase = new Dictionary<string, List<DungeonData>>();
         private Dictionary<string, DungeonInfoData> dungeonInfoDatabase = new Dictionary<string, DungeonInfoData>();
         private DungeonEntity DungeonEntity;
+
+        private List<GameObject> activeButtons = new();
 
         private void Awake()
         {
@@ -127,16 +133,48 @@ namespace Arena.Dungeon
             DungeonMinLevel.text = $"Min level: {DungeonEntity.DungeonInfoData.Level}";
         }
 
+        public DungeonInfoData GetDungeonInfo(string dungeonName)
+        {
+            if (!dungeonInfoDatabase.TryGetValue(dungeonName, out var dungeonInfo))
+            {
+                return null;
+            }
+            return dungeonInfo;
+        }
+
         void OnEnterDungeon(string dungeonName)
         {
             // Populate Checkpoint Floors
             DungeonView.SafeSetActive(true);
             GenerateDungeon(dungeonName);
 
+            foreach (var activeButton in activeButtons)
+            {
+                FloorButtonPoolManager.ReturnToPool(activeButton);
+            }
+            activeButtons.Clear();
+
+            // TODO: We'll have floors 6-X in the future, but for now, we'll just
+            // do floor 1
+
+            int floorGroups = 1;
+            for (int floorIndex = 0; floorIndex < floorGroups; ++floorIndex)
+            {
+                var floorButton = FloorButtonPoolManager.GetPooledObject<Button>();
+
+                activeButtons.Add(floorButton.gameObject);
+
+                floorButton.gameObject.transform.SetParent(DungeonGridContent);
+                floorButton.gameObject.GetComponentInChildren<TextMeshProUGUI>().text = $"Floor {floorIndex * 5 + 1}";
+                floorButton.onClick.RemoveAllListeners();
+                floorButton.onClick.AddListener(() => OnEnterDungeonFloor(1));
+                floorButton.gameObject.SafeSetActive(true);
+            }
+
             SyncViewText();
         }
 
-        public void EnterDungeonFloor(int floor)
+        public void OnEnterDungeonFloor(int floor)
         {
             DungeonView.SafeSetActive(false);
             DungeonEntity.EnterFloor(floor);
