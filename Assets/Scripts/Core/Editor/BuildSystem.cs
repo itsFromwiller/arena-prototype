@@ -67,6 +67,7 @@ namespace Arena.Core.Builds
                 if (!string.IsNullOrEmpty(error) && !error.Contains("warning"))
                 {
                     UnityEngine.Debug.LogWarning("Git Error/Warning: " + error);
+                    UnityEngine.Debug.LogWarning(output);
                 }
             }
         }
