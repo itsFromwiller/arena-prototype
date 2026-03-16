@@ -7,6 +7,7 @@ using Arena.Core;
 using Arena.Dungeon;
 using Arena.Player;
 using System;
+using Arena.Requests;
 
 namespace Arena.Tavern
 {
@@ -20,7 +21,7 @@ namespace Arena.Tavern
         public GameObject MainOptionView;
         public GossipView GossipView;
         public TavernFoodView FoodView;
-        public GameObject RequestsView;
+        public RequestsView RequestsView;
 
         private List<GossipData> CurrentGossip = new();
         private int CurrentGossipIndex = 0;
@@ -75,7 +76,7 @@ namespace Arena.Tavern
             MainOptionView.SafeSetActive(true);
             GossipView.gameObject.SafeSetActive(false);
             FoodView.gameObject.SafeSetActive(false);
-            RequestsView.SafeSetActive(false);
+            RequestsView.transform.parent.gameObject.SafeSetActive(false);
         }
 
         void OnEnterDungeonRoom(DungeonRoomEntity entity)
@@ -107,7 +108,9 @@ namespace Arena.Tavern
 
         public void SelectRequestsButton()
         {
-
+            MainOptionView.SafeSetActive(false);
+            RequestsView.transform.parent.gameObject.SafeSetActive(true);
+            RequestsView.SetupRequestDataView(RequestSystem.Instance.GetRequestsForTavern(4));
         }
 
         private void BuildCurrentGossip()

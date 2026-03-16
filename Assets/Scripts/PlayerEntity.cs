@@ -1,5 +1,8 @@
 ﻿using Arena.Combat;
 using Arena.Items;
+using Arena.Loot;
+using Arena.Requests;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -18,6 +21,10 @@ namespace Arena.Player
         public int StatPointsRemaining;
         public int LastItemID = 0;
         public List<string> DungeonsUnlocked = new();
+        public Dictionary<string, int> KillRequestTracker = new();
+        public List<string> ActiveRequests = new();
+        [JsonIgnore]
+        public List<RequestData> ActiveRequestData = new();
 
         public override int MaxHP
         {
@@ -98,6 +105,14 @@ namespace Arena.Player
                 itemDataSlot.RarityModifierData = ItemSystem.Instance.GetRarityModifier(itemDataSlot.Rarity);
                 itemDataSlot.RandomModifierData = ItemSystem.Instance.GetRandomModifier(itemDataSlot.Random);
             }
+            foreach (var activeRequest in ActiveRequests)
+            {
+                var requestData = RequestSystem.Instance.GetRequestData(activeRequest);
+                if (requestData != null)
+                {
+                    ActiveRequestData.Add(RequestSystem.Instance.GetRequestData(activeRequest));
+                }
+            }
         }
 
         public bool HasUnlockedDungeon(string dungeonName)
@@ -110,6 +125,90 @@ namespace Arena.Player
             if (!HasUnlockedDungeon(dungeonName))
             {
                 DungeonsUnlocked.Add(dungeonName);
+            }
+        }
+
+        public void AcceptRequest(RequestData requestData)
+        {
+            if (requestData.RequestType == RequestType.Kill)
+            {
+                if (!KillRequestTracker.ContainsKey(requestData.TargetName))
+                {
+                    KillRequestTracker.Add(requestData.TargetName, 0);
+                }
+            }
+            ActiveRequests.Add(requestData.Id);
+            ActiveRequestData.Add(requestData);
+        }
+
+        public bool HasRequest(string requestDataId)
+        {
+            return ActiveRequests.Contains(requestDataId);
+        }
+
+        public bool CanCompleteRequest(RequestData requestData)
+        {
+            if (requestData.RequestType == RequestType.Kill)
+            {
+                if (KillRequestTracker.TryGetValue(requestData.TargetName, out int killCount))
+                {
+                    return killCount >= requestData.Count;
+                }
+            }
+            else if (requestData.RequestType == RequestType.Gather)
+            {
+                return (GetItemCount(requestData.TargetName) >= requestData.Count);
+            }
+            return false;
+        }
+
+        public void CompleteRequest(RequestData requestData)
+        {
+            if (requestData.RequestType == RequestType.Kill)
+            {
+                // See if any other active requests are tracking this. If so,
+                // keep it. Otherwise, we remove it
+                bool found = false;
+                foreach (var request in ActiveRequestData)
+                {
+                    if (request.RequestType == RequestType.Kill && request.TargetName == requestData.TargetName)
+                    {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found)
+                {
+                    KillRequestTracker.Remove(requestData.TargetName);
+                }
+            }
+            else if (requestData.RequestType == RequestType.Gather)
+            {
+                // Remove gathered items from inventory
+                UseItem(requestData.TargetName, requestData.Count);
+            }
+
+            if (requestData.RewardXP > 0)
+            {
+                EarnXP(requestData.RewardXP);
+            }
+            if (requestData.RewardGold > 0)
+            {
+                Gold += requestData.RewardGold;
+            }
+            if (!string.IsNullOrEmpty(requestData.RewardItem))
+            {
+                ItemData itemData = ItemSystem.Instance.GetItemData(requestData.RewardItem);
+                // If it's not consumable, provide an Uncommon version of the item
+                if (!itemData.IsStackable())
+                {
+                    var randomModifier = LootSystem.Instance.GetRandomItemModifier();
+                    GainItem(itemData.Name, 1, "Uncommon", randomModifier.Name);
+                }
+                else
+                {
+                    GainItem(itemData.Name, 1, null, null);
+                }
             }
         }
 
@@ -427,12 +526,18 @@ namespace Arena.Player
                 ItemDataSlot itemSlot = ItemSlots[i];
                 if (itemSlot.Name == itemName)
                 {
-                    itemSlot.Count -= count;
+                    int countToRemove = itemSlot.Count > count ? count : itemSlot.Count;
+                    itemSlot.Count -= countToRemove;
+                    count -= countToRemove;
+                    
                     if (itemSlot.Count <= 0)
                     {
                         ItemSlots.RemoveAt(i);
                     }
-                    return;
+                    if (count <= 0)
+                    {
+                        return;
+                    }
                 }
             }
         }
@@ -541,14 +646,15 @@ namespace Arena.Player
 
         public int GetItemCount(string itemName)
         {
+            int count = 0;
             foreach (var itemSlot in ItemSlots)
             {
                 if (itemSlot.Name == itemName)
                 {
-                    return itemSlot.Count;
+                    count += itemSlot.Count;
                 }
             }
-            return 0;
+            return count;
         }
 
         public override int CalculatedAttack()

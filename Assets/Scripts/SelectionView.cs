@@ -13,8 +13,6 @@ namespace Arena
 
     public class SelectionView : MonoBehaviour
     {
-        public ItemSelectionItemView ItemViewTemplate;
-        public SkillSelectionItemView SkillViewTemplate;
         public ScrollRect ScrollView;
         public GameObjectPoolManager ItemViewPoolManager;
         public GameObjectPoolManager SkillViewPoolManager;

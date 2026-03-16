@@ -9,6 +9,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using Arena.Tavern;
+using Arena.Requests;
 
 public class AppSystem : MonoBehaviour
 {
@@ -38,6 +39,7 @@ public class AppSystem : MonoBehaviour
     {
         // Wait for data to be downloaded
         yield return new WaitUntil(() => DataDownloader.HasData);
+
         // Add data to all systems
         ItemSystem.Instance.SetData(DataDownloader.Data);
         EnemySystem.Instance.SetData(DataDownloader.Data);
@@ -45,13 +47,18 @@ public class AppSystem : MonoBehaviour
         DungeonSystem.Instance.SetData(DataDownloader.Data);
         LootSystem.Instance.SetData(DataDownloader.Data);
         TavernSystem.Instance.SetData(DataDownloader.Data);
+        RequestSystem.Instance.SetData(DataDownloader.Data);
+
         // Init systems (creates references as needed, such as the loot tables referencing items)
-        ItemSystem.Instance.Init();
         PlayerSystem.Instance.Init();
+        ItemSystem.Instance.Init();
         EnemySystem.Instance.Init();
+        SkillSystem.Instance.Init();
+        DungeonSystem.Instance.Init();
         LootSystem.Instance.Init();
         TavernSystem.Instance.Init();
-        DungeonSystem.Instance.Init();
+        RequestSystem.Instance.Init();
+
         // Finalize systems
         // Start game
         TitleViewLoadingText.SafeSetActive(false);

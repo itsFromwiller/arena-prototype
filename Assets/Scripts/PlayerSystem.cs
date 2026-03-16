@@ -26,6 +26,7 @@ namespace Arena.Player
             GameEvents.OnRestAtInn += HandleOnRestAtInn;
             GameEvents.OnGetGold += HandleOnGetGold;
             GameEvents.OnGetLoot += HandleOnGetLoot;
+            GameEvents.OnEnemyKilled += OnEnemyKilled;
         }
 
         private void OnDisable()
@@ -33,6 +34,7 @@ namespace Arena.Player
             GameEvents.OnRestAtInn -= HandleOnRestAtInn;
             GameEvents.OnGetGold -= HandleOnGetGold;
             GameEvents.OnGetLoot -= HandleOnGetLoot;
+            GameEvents.OnEnemyKilled -= OnEnemyKilled;
         }
 
         private void Awake()
@@ -168,6 +170,17 @@ namespace Arena.Player
                     loot.ItemDataSlot.RarityModifierData != null ? loot.ItemDataSlot.RarityModifierData.Name : null,
                     loot.ItemDataSlot.RandomModifierData != null ? loot.ItemDataSlot.RandomModifierData.Name : null);
             }
+        }
+
+        private void OnEnemyKilled(CombatContext combatContext)
+        {
+            // Only care about kills we are tracking
+            var player = PlayerSystem.Instance.Player;
+            if (!player.KillRequestTracker.ContainsKey(combatContext.Enemy.Data.Name))
+            {
+                return;
+            }
+            player.KillRequestTracker[combatContext.Enemy.Data.Name]++;
         }
     }
 }
