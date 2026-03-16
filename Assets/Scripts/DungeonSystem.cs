@@ -197,6 +197,11 @@ namespace Arena.Dungeon
             return LootSystem.Instance.GetLootTables($"{DungeonEntity.DungeonName}TreasureRoom");
         }
 
+        public List<LootTableData> GetFountainRoomLootTableForCurrentDungeon()
+        {
+            return LootSystem.Instance.GetLootTables($"{DungeonEntity.DungeonName}FountainRoom");
+        }
+
         public void FinishDungeon()
         {
             GameEvents.FinishDungeon();

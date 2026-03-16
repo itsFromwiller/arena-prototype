@@ -44,6 +44,7 @@ public class GameEvents
     public static Action OnStartCombat;
     public static Action<CombatContext> OnPlayerDamaged;
     public static Action<CombatContext> OnPlayerHealed;
+    public static Action OnPlayerHealedAtFountain;
     public static Action<CombatContext> OnPlayerRestoreMP;
     public static Action<CombatContext> OnPlayerStealMP;
     public static Action<CombatContext> OnPlayerMissed;
@@ -198,6 +199,11 @@ public class GameEvents
     public static void PlayerHealed(CombatContext combatContext)
     {
         OnPlayerHealed?.Invoke(combatContext);
+    }
+
+    public static void PlayerHealedAtFountain()
+    {
+        OnPlayerHealedAtFountain?.Invoke();
     }
 
     public static void PlayerRestoreMP(CombatContext combatContext)

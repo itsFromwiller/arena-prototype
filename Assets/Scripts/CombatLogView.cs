@@ -31,6 +31,7 @@ public class CombatLogView : MonoBehaviour
         GameEvents.OnPlayerLevelChanged += OnPlayerLevelChanged;
         GameEvents.OnPlayerDamaged += OnPlayerDamaged;
         GameEvents.OnPlayerHealed += OnPlayerHealed;
+        GameEvents.OnPlayerHealedAtFountain += OnPlayerHealedAtFountain;
         GameEvents.OnPlayerRestoreMP += OnPlayerRestoreMP;
         GameEvents.OnPlayerKilled += OnPlayerKilled;
         GameEvents.OnPlayerMissed += OnPlayerMissed;
@@ -53,6 +54,7 @@ public class CombatLogView : MonoBehaviour
         GameEvents.OnGetLoot -= OnGetLoot;
         GameEvents.OnPlayerDamaged -= OnPlayerDamaged;
         GameEvents.OnPlayerHealed -= OnPlayerHealed;
+        GameEvents.OnPlayerHealedAtFountain -= OnPlayerHealedAtFountain;
         GameEvents.OnPlayerRestoreMP -= OnPlayerRestoreMP;
         GameEvents.OnPlayerStealMP -= OnPlayerStealMP;
         GameEvents.OnPlayerKilled -= OnPlayerKilled;
@@ -120,6 +122,11 @@ public class CombatLogView : MonoBehaviour
         {
             AddToLog($"{BadColor}{combatContext.Enemy.Data.Name} hits you for {combatContext.DamageDealt}</color>");
         }
+    }
+
+    private void OnPlayerHealedAtFountain()
+    {
+        AddToLog($"{GoodColor}You drank from the Magic Fountain and restored your HP/MP!</color>");
     }
 
     private void OnPlayerHealed(CombatContext combatContext)

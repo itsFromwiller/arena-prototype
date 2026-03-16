@@ -36,6 +36,10 @@ namespace Arena.Combat
         public GameObject TreasureRoomView;
         public GameObject TreasureRoomChestButton;
         public TextMeshProUGUI TreasureRoomResultText;
+        public GameObject FountainRoomView;
+        public GameObject FountainRoomDrinkButton;
+        public GameObject FountainRoomSearchButton;
+        public TextMeshProUGUI FountainRoomResultText;
 
         private CombatContext CombatContext = new CombatContext();
 
@@ -67,6 +71,7 @@ namespace Arena.Combat
             EnemyCombatStatsView.gameObject.SafeSetActive(false);
             PlayerCombatStatsView.gameObject.SafeSetActive(false);
             TreasureRoomView.SafeSetActive(false);
+            FountainRoomView.SafeSetActive(false);
         }
 
         private void OnEnable()
@@ -105,6 +110,7 @@ namespace Arena.Combat
             EnemyCombatStatsView.gameObject.SafeSetActive(false);
             PlayerCombatStatsView.gameObject.SafeSetActive(false);
             TreasureRoomView.SafeSetActive(false);
+            FountainRoomView.SafeSetActive(false);
         }
 
         void HandleEnemySpawned(EnemyEntity enemyEntity)
@@ -137,7 +143,7 @@ namespace Arena.Combat
                 }
                 case "Fountain":
                 {
-//                    ShowFountainRoom();
+                    ShowFountainRoom();
                     break;
                 }
             }
@@ -199,6 +205,7 @@ namespace Arena.Combat
             CombatLogView.gameObject.SafeSetActive(false);
             EnemyCombatStatsView.gameObject.SafeSetActive(true);
             TreasureRoomView.SafeSetActive(false);
+            FountainRoomView.SafeSetActive(false);
         }
 
         public void ProcessPlayerSkill(SkillDataSlot skillDataSlot)
@@ -270,6 +277,7 @@ namespace Arena.Combat
             CombatLogView.gameObject.SafeSetActive(false);
             EnemyCombatStatsView.gameObject.SafeSetActive(true);
             TreasureRoomView.SafeSetActive(false);
+            FountainRoomView.SafeSetActive(false);
         }
 
         public void ProcessPlayerItem(ItemDataSlot itemDataSlot)
@@ -811,9 +819,16 @@ namespace Arena.Combat
             TreasureRoomResultText.gameObject.SafeSetActive(true);
             TreasureRoomResultText.text = "";
             
-            var treasureRoomLootTables = DungeonSystem.Instance.GetTreasureRoomLootTableForCurrentDungeon();
-            var lootResultList = LootSystem.Instance.RollLoot(treasureRoomLootTables, CombatContext.Player.Level + 5, false);
+            var roomLootTables = DungeonSystem.Instance.GetTreasureRoomLootTableForCurrentDungeon();
+            var lootResultList = LootSystem.Instance.RollLoot(roomLootTables, CombatContext.Player.Level + 5, false);
 
+            ProcessRoomLoot(lootResultList, TreasureRoomResultText);
+
+            EnableButtons();
+        }
+
+        public void ProcessRoomLoot(List<LootResult> lootResultList, TextMeshProUGUI resultText)
+        {
             ProcessLoot(lootResultList);
 
             int lootGold = 0;
@@ -824,7 +839,7 @@ namespace Arena.Combat
                     lootGold += lootResult.Gold;
                 }
             }
-            
+
             totalEarnedGold += lootGold;
             GameEvents.GetGold(lootGold);
 
@@ -848,12 +863,67 @@ namespace Arena.Combat
                         sb.AppendLine(ItemSystem.Instance.BuildName(item.ItemDataSlot));
                     }
                 }
-                TreasureRoomResultText.text = sb.ToString();
+                resultText.text += sb.ToString();
             }
+        }
+
+        public void ShowFountainRoom()
+        {
+            EnemyCombatStatsView.gameObject.SafeSetActive(false);
+            CombatLogView.gameObject.SafeSetActive(false);
+            CombatActionsView.SafeSetActive(false);
+            AfterCombatActionsView.SafeSetActive(true);
+            AfterCombatContinueButton.SafeSetActive(true);
+            AfterCombatItemButton.SafeSetActive(true);
+            AfterCombatSkillButton.SafeSetActive(true);
+
+            DisableButtons();
+
+            FountainRoomView.SafeSetActive(true);
+            FountainRoomDrinkButton.SafeSetActive(true);
+            FountainRoomSearchButton.SafeSetActive(true);
+            FountainRoomResultText.gameObject.SafeSetActive(false);
+        }
+
+        public void SelectFountainDrink()
+        {
+            FountainRoomDrinkButton.SafeSetActive(false);
+            FountainRoomSearchButton.SafeSetActive(false);
+            FountainRoomResultText.text = "You drank some water, which restored your HP/MP.\n\nThe fountain has dried up and there is nothing left.";
+            FountainRoomResultText.gameObject.SafeSetActive(true);
+
+            CombatContext.Player.HP = CombatContext.Player.MaxHP;
+            CombatContext.Player.MP = CombatContext.Player.MaxMP;
+            GameEvents.PlayerHPChanged();
+            GameEvents.PlayerMPChanged();
+            GameEvents.PlayerHealedAtFountain();
 
             EnableButtons();
         }
 
+        public void SelectFountainSearch()
+        {
+            FountainRoomDrinkButton.SafeSetActive(false);
+            FountainRoomSearchButton.SafeSetActive(false);
+
+            var roomLootTables = DungeonSystem.Instance.GetFountainRoomLootTableForCurrentDungeon();
+            var lootResultList = LootSystem.Instance.RollLoot(roomLootTables, CombatContext.Player.Level + 5, false);
+            if (lootResultList.Count == 0)
+            {
+                FountainRoomResultText.text = "You searched the fountain's waters and came up with nothing.\n";
+            }
+            else
+            {
+                FountainRoomResultText.text = "You searched the fountain's waters and found something!\n\n";
+                ProcessRoomLoot(lootResultList, FountainRoomResultText);
+            }
+
+            FountainRoomResultText.text += "\nThe fountain has dried up and there is nothing left.";
+
+            FountainRoomResultText.gameObject.SafeSetActive(true);
+
+            EnableButtons();
+        }
 
         public void SelectContinue()
         {
@@ -864,6 +934,7 @@ namespace Arena.Combat
             CombatSelectionView.gameObject.SafeSetActive(false);
             CombatLogView.gameObject.SafeSetActive(true);
             TreasureRoomView.SafeSetActive(false);
+            FountainRoomView.SafeSetActive(false);
 
             DungeonSystem.Instance.AdvanceRoom();
         }
