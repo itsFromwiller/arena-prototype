@@ -64,10 +64,9 @@ namespace Arena.Core.Builds
                 string output = process.StandardOutput.ReadToEnd();
                 string error = process.StandardError.ReadToEnd();
 
-                if (!string.IsNullOrEmpty(error) && !error.Contains("warning"))
+                if (process.ExitCode != 0 && !string.IsNullOrEmpty(error)) // && !error.Contains("warning"))
                 {
                     UnityEngine.Debug.LogWarning("Git Error/Warning: " + error);
-                    UnityEngine.Debug.LogWarning(output);
                 }
             }
         }
