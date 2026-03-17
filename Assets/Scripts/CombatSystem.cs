@@ -598,7 +598,19 @@ namespace Arena.Combat
         {
             GameEvents.EnemyKilled(CombatContext);
 
-            var lootFound = LootSystem.Instance.RollLoot(CombatContext.Enemy.Data.LootTableDataList, CombatContext.Player.Level + 5, false);
+            List<LootTableData> combinedLootTables = new List<LootTableData>(CombatContext.Enemy.Data.LootTableDataList);
+            foreach (var requestData in CombatContext.Player.ActiveRequestData)
+            {
+                if (string.IsNullOrEmpty(requestData.SpawnLoot))
+                {
+                    continue;
+                }
+                if (string.IsNullOrEmpty(requestData.RequiresDungeon) || requestData.RequiresDungeon == DungeonSystem.Instance.GetCurrentDungeonName())
+                {
+                    combinedLootTables.AddRange(LootSystem.Instance.GetLootTables(requestData.SpawnLoot));
+                }
+            }
+            var lootFound = LootSystem.Instance.RollLoot(combinedLootTables, CombatContext.Player.Level + 5, false);
             ProcessLoot(lootFound);
 
             int lootGold = 0;

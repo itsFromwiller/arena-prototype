@@ -142,6 +142,11 @@ namespace Arena.Dungeon
             return dungeonInfo;
         }
 
+        public string GetCurrentDungeonName()
+        {
+            return DungeonEntity != null ? DungeonEntity.DungeonName : null;
+        }
+
         void OnEnterDungeon(string dungeonName)
         {
             // Populate Checkpoint Floors
