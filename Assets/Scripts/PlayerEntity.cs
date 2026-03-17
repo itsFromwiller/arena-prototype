@@ -214,6 +214,8 @@ namespace Arena.Player
                     GainItem(itemData.Name, 1, null, null);
                 }
             }
+            ActiveRequests.Remove(requestData.Id);
+            ActiveRequestData.Remove(requestData);
         }
 
         public void LearnSkill(string skillName)
