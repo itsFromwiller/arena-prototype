@@ -8,14 +8,11 @@ namespace Arena.Enemies
 {
     public class EnemyEntity : CombatEntity
     {
+        [JsonIgnore]
         public EnemyData Data;
 
         public int XP;
         public double Scale;
-        public EnemyActionData Action1;
-        public EnemyActionData Action2;
-        public EnemyActionData Action3;
-        public EnemyActionData Action4;
 
         [JsonIgnore]
         public EnemyActionData ActionToPerform;
@@ -68,7 +65,6 @@ namespace Arena.Enemies
                 }
                 if (activeBuff.IsExpired)
                 {
-                    Debug.LogError($"Expired {activeBuff.BuffName}");
                     ActiveBuffs.RemoveAt(i);
                     continue;
                 }
@@ -140,7 +136,6 @@ namespace Arena.Enemies
                 ActionCooldown.Add(enemyAction.Name, 0);
             }
             ActionCooldown[enemyAction.Name] += enemyAction.CooldownTurns;
-            Debug.LogError($"{enemyAction.Name} cooldown set to {ActionCooldown[enemyAction.Name]}");
         }
 
         public void HandleBuffsForEnemyAction(EnemyActionData enemyAction)
@@ -148,14 +143,11 @@ namespace Arena.Enemies
             if (enemyAction.DamageMultiplier > 0.0)
             {
                 ActiveBuffs.Add(new BuffEntity($"{enemyAction.Name}_atk", SkillType.ModifyAllAttack, enemyAction.DamageMultiplier, enemyAction.BuffTurns));
-                Debug.LogError($"Added {ActiveBuffs[ActiveBuffs.Count - 1].BuffName}");
             }
             if (enemyAction.DefenseMultiplier > 0.0)
             {
                 ActiveBuffs.Add(new BuffEntity($"{enemyAction.Name}_def", SkillType.ModifyAllDefense, enemyAction.DefenseMultiplier, enemyAction.BuffTurns));
-                Debug.LogError($"Added {ActiveBuffs[ActiveBuffs.Count - 1].BuffName}");
             }
-
         }
 
         public override bool DidUseSkillSuccessfully(CombatContext combatContext)
