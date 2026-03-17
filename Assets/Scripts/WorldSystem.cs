@@ -40,9 +40,27 @@ namespace Arena.World
             }
             activeButtons.Clear();
 
+            List<DungeonInfoData> unlockedDungeons = new();
             foreach (var dungeonName in PlayerSystem.Instance.Player.DungeonsUnlocked)
             {
                 var dungeonInfo = DungeonSystem.Instance.GetDungeonInfo(dungeonName);
+                if (dungeonInfo != null)
+                {
+                    unlockedDungeons.Add(dungeonInfo);
+                }
+            }
+            unlockedDungeons.Sort((a, b) =>
+            {
+                int levelComparison = a.Level - b.Level;
+                if (levelComparison == 0)
+                {
+                    return string.Compare(a.Name, b.Name);
+                }
+                return levelComparison;
+            });
+
+            foreach (var dungeonInfo in unlockedDungeons)
+            { 
                 var dungeonButton = DungeonButtonPoolManager.GetPooledObject<Button>();
 
                 activeButtons.Add(dungeonButton.gameObject);
