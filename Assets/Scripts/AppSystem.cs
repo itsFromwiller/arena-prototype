@@ -37,10 +37,6 @@ public class AppSystem : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     IEnumerator Start()
     {
-        WebGLInput.mobileKeyboardSupport = true;
-        WebGLInput.captureAllKeyboardInput = false;
-        TouchScreenKeyboard.hideInput = false;
-
         // Wait for data to be downloaded
         yield return new WaitUntil(() => DataDownloader.HasData);
 
