@@ -72,18 +72,21 @@ namespace Arena.Player
             MDefense = 0;
             Speed = 0;
 
-            GainItem("Wooden Helmet", 1, "Legendary", "Shark");
-            int helmetID = LastItemID;
-            GainItem("Bone Axe", 1, "Uncommon", null);
-            int weaponID = LastItemID;
-            GainItem("Bone Shield", 1, "Rare", "Monkey");
-            int shieldID = LastItemID;
-            GainItem("Leaf Cape", 1, "Epic", null);
-            int capeID = LastItemID;
-            EquipItem("Wooden Helmet", helmetID);
-            EquipItem("Bone Axe", weaponID);
-            EquipItem("Bone Shield", shieldID);
-            EquipItem("Leaf Cape", capeID);
+            if (name == "Dev")
+            {
+                GainItem("Wooden Helmet", 1, "Legendary", "Shark");
+                int helmetID = LastItemID;
+                GainItem("Bone Axe", 1, "Uncommon", null);
+                int weaponID = LastItemID;
+                GainItem("Bone Shield", 1, "Rare", "Monkey");
+                int shieldID = LastItemID;
+                GainItem("Leaf Cape", 1, "Epic", null);
+                int capeID = LastItemID;
+                EquipItem("Wooden Helmet", helmetID);
+                EquipItem("Bone Axe", weaponID);
+                EquipItem("Bone Shield", shieldID);
+                EquipItem("Leaf Cape", capeID);
+            }
         }
 
         public override void Init()
