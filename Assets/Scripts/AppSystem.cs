@@ -38,6 +38,8 @@ public class AppSystem : MonoBehaviour
     IEnumerator Start()
     {
         WebGLInput.mobileKeyboardSupport = true;
+        WebGLInput.captureAllKeyboardInput = false;
+        TouchScreenKeyboard.hideInput = false;
 
         // Wait for data to be downloaded
         yield return new WaitUntil(() => DataDownloader.HasData);

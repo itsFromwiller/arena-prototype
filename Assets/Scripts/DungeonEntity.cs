@@ -30,6 +30,7 @@ namespace Arena.Dungeon
         public DungeonInfoData DungeonInfoData;
 
         public Dictionary<string, int> SpawnCount = new();
+        public List<string> RequestEnemiesToSpawn = new();
 
         public DungeonEntity(string dungeonName, List<DungeonData> dungeonDataList, DungeonInfoData dungeonInfoData)
         {
