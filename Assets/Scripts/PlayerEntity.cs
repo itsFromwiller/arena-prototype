@@ -137,6 +137,10 @@ namespace Arena.Player
                     KillRequestTracker.Add(requestData.TargetName, 0);
                 }
             }
+            if (!string.IsNullOrEmpty(requestData.SpawnDungeon))
+            {
+                UnlockDungeon(requestData.SpawnDungeon);
+            }
             ActiveRequests.Add(requestData.Id);
             ActiveRequestData.Add(requestData);
         }

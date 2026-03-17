@@ -114,7 +114,8 @@ namespace Arena.Requests
                 }
                 if (!string.IsNullOrEmpty(requestData.RequiresDungeon))
                 {
-                    if (!player.HasUnlockedDungeon(requestData.RequiresDungeon))
+                    bool spawnedDungeonIsRequiredDungeon = !string.IsNullOrEmpty(requestData.SpawnDungeon) && requestData.SpawnDungeon == requestData.RequiresDungeon;
+                    if (!spawnedDungeonIsRequiredDungeon && !player.HasUnlockedDungeon(requestData.RequiresDungeon))
                     {
                         continue;
                     }
