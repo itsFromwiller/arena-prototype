@@ -38,7 +38,9 @@ namespace Arena.Dungeon
             {
                 case "Combat":
                 {
-                    var selectedEnemyData = PickFromBucket(DungeonEntity.EnemyData);
+                    List<DungeonData> combinedSpawnList = new List<DungeonData>(DungeonEntity.EnemyData);
+                    combinedSpawnList.AddRange(DungeonEntity.RequestEnemiesToSpawn);
+                    var selectedEnemyData = PickFromBucket(combinedSpawnList);
                     SpawnName = selectedEnemyData.Spawn;
 #if DEBUG_LOGS
                     Debug.Log($"Dungeon: Spawning {SpawnName} enemy");

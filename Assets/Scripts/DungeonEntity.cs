@@ -1,8 +1,10 @@
 ﻿// Uncomment to turn on debug lines
 // #define DEBUG_LOGS
 
+using Arena.Player;
 using Newtonsoft.Json;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace Arena.Dungeon
 {
@@ -28,14 +30,38 @@ namespace Arena.Dungeon
         public DungeonData FloorData;
         [JsonIgnore]
         public DungeonInfoData DungeonInfoData;
+        [JsonIgnore]
+        public List<DungeonData> RequestEnemiesToSpawn = new();
 
         public Dictionary<string, int> SpawnCount = new();
-        public List<string> RequestEnemiesToSpawn = new();
 
         public DungeonEntity(string dungeonName, List<DungeonData> dungeonDataList, DungeonInfoData dungeonInfoData)
         {
             DungeonName = dungeonName;
             DungeonInfoData = dungeonInfoData;
+            RequestEnemiesToSpawn.Clear();
+
+            foreach (var requestData in PlayerSystem.Instance.Player.ActiveRequestData)
+            {
+                if (string.IsNullOrEmpty(requestData.SpawnEnemy))
+                {
+                    continue;
+                }
+                if (string.IsNullOrEmpty(requestData.RequiresDungeon) || requestData.RequiresDungeon == DungeonName)
+                {
+                    var dungeonData = new DungeonData();
+                    dungeonData.Name = DungeonName;
+                    dungeonData.Weight = 50;
+                    dungeonData.SpawnType = SpawnType.Enemy;
+                    dungeonData.Spawn = requestData.TargetName;
+                    dungeonData.MinRoom = 1;
+                    dungeonData.MinFloor = 1;
+                    dungeonData.MaxRoom = 99;
+                    dungeonData.MaxFloor = 99;
+                    RequestEnemiesToSpawn.Add(dungeonData);
+                }
+            }
+
             foreach (var dungeonData in dungeonDataList)
             {
                 switch (dungeonData.SpawnType)
