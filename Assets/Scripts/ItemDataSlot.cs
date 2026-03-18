@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using System;
 
 namespace Arena.Items
 {
@@ -64,35 +65,40 @@ namespace Arena.Items
         {
             double statMultiplier = RarityModifierData != null ? RarityModifierData.AttackMultiplier : 1.0;
             statMultiplier *= RandomModifierData != null ? RandomModifierData.AttackMultiplier : 1.0;
-            return (int)(ItemData.Attack * statMultiplier);
+            int stat = RandomModifierData != null ? Math.Max(1, ItemData.Attack) : ItemData.Attack;
+            return (int)(stat * statMultiplier);
         }
 
         public int GetCalculatedDefense()
         {
             double statMultiplier = RarityModifierData != null ? RarityModifierData.DefenseMultiplier : 1.0;
             statMultiplier *= RandomModifierData != null ? RandomModifierData.DefenseMultiplier : 1.0;
-            return (int)(ItemData.Defense * statMultiplier);
+            int stat = RandomModifierData != null ? Math.Max(1, ItemData.Defense) : ItemData.Defense;
+            return (int)(stat * statMultiplier);
         }
 
         public int GetCalculatedMAttack()
         {
             double statMultiplier = RarityModifierData != null ? RarityModifierData.MAttackMultiplier : 1.0;
             statMultiplier *= RandomModifierData != null ? RandomModifierData.MAttackMultiplier : 1.0;
-            return (int)(ItemData.MAttack * statMultiplier);
+            int stat = RandomModifierData != null ? Math.Max(1, ItemData.MAttack) : ItemData.MAttack;
+            return (int)(stat * statMultiplier);
         }
 
         public int GetCalculatedMDefense()
         {
             double statMultiplier = RarityModifierData != null ? RarityModifierData.MDefenseMultiplier : 1.0;
             statMultiplier *= RandomModifierData != null ? RandomModifierData.MDefenseMultiplier : 1.0;
-            return (int)(ItemData.MDefense * statMultiplier);
+            int stat = RandomModifierData != null ? Math.Max(1, ItemData.MDefense) : ItemData.MDefense;
+            return (int)(stat * statMultiplier);
         }
 
         public int GetCalculatedSpeed()
         {
             double statMultiplier = RarityModifierData != null ? RarityModifierData.SpeedMultiplier : 1.0;
             statMultiplier *= RandomModifierData != null ? RandomModifierData.SpeedMultiplier : 1.0;
-            return (int)(ItemData.Speed * statMultiplier);
+            int stat = RandomModifierData != null ? Math.Max(1, ItemData.Speed) : ItemData.Speed;
+            return (int)(stat * statMultiplier);
         }
 
     }

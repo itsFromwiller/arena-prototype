@@ -170,25 +170,30 @@ namespace Arena.Items
                 else
                 {
                     StringBuilder sb = new StringBuilder();
-                    if (itemData.Attack > 0)
+                    int stat = itemDataSlot.GetCalculatedAttack();
+                    if (stat > 0)
                     {
-                        sb.Append($"<color=#FF0000>[Atk +{itemDataSlot.GetCalculatedAttack()}]</color> ");
+                        sb.Append($"<color=#FF0000>[Atk +{stat}]</color> ");
                     }
-                    if (itemData.MAttack > 0)
+                    stat = itemDataSlot.GetCalculatedMAttack();
+                    if (stat > 0)
                     {
-                        sb.Append($"<color=#0000FF>[MAtk +{itemDataSlot.GetCalculatedMAttack()}]</color> ");
+                        sb.Append($"<color=#0000FF>[MAtk +{stat}]</color> ");
                     }
-                    if (itemData.Defense > 0)
+                    stat = itemDataSlot.GetCalculatedDefense();
+                    if (stat > 0)
                     {
-                        sb.Append($"<color=#FFFF00>[Def +{itemDataSlot.GetCalculatedDefense()}]</color> ");
+                        sb.Append($"<color=#FFFF00>[Def +{stat}]</color> ");
                     }
-                    if (itemData.MDefense > 0)
+                    stat = itemDataSlot.GetCalculatedMDefense();
+                    if (stat > 0)
                     {
-                        sb.Append($"<color=#FF00FF>[MDef +{itemDataSlot.GetCalculatedMDefense()}]</color> ");
+                        sb.Append($"<color=#FF00FF>[MDef +{stat}]</color> ");
                     }
-                    if (itemData.Speed > 0)
+                    stat = itemDataSlot.GetCalculatedSpeed();
+                    if (stat > 0)
                     {
-                        sb.Append($"<color=#00FF00>[Spd +{itemDataSlot.GetCalculatedSpeed()}]</color> ");
+                        sb.Append($"<color=#00FF00>[Spd +{stat}]</color> ");
                     }
                     itemDataSlot.CachedDescription = sb.ToString();
                 }
