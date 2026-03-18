@@ -27,6 +27,7 @@ namespace Arena.Player
             GameEvents.OnGetGold += HandleOnGetGold;
             GameEvents.OnGetLoot += HandleOnGetLoot;
             GameEvents.OnEnemyKilled += OnEnemyKilled;
+            GameEvents.OnSaveInitiated += OnSaveInitiated;
         }
 
         private void OnDisable()
@@ -35,6 +36,7 @@ namespace Arena.Player
             GameEvents.OnGetGold -= HandleOnGetGold;
             GameEvents.OnGetLoot -= HandleOnGetLoot;
             GameEvents.OnEnemyKilled -= OnEnemyKilled;
+            GameEvents.OnSaveInitiated -= OnSaveInitiated;
         }
 
         private void Awake()
@@ -53,6 +55,11 @@ namespace Arena.Player
             {
                 SavePlayer();
             }
+        }
+
+        private void OnSaveInitiated()
+        {
+            SavePlayer();
         }
 
         public void SetData(Dictionary<string, string> data)
@@ -112,6 +119,7 @@ namespace Arena.Player
             Player.LearnSkill("Run Away");
             Player.GainItem("Weak Potion", 5, null, null);
             Player.Init();
+            GameEvents.RequestSaveGame();
         }
 
         public void SavePlayer()
@@ -151,11 +159,13 @@ namespace Arena.Player
             Player.MP = Player.MaxMP;
             GameEvents.PlayerHPChanged();
             GameEvents.PlayerMPChanged();
+            GameEvents.RequestSaveGame();
         }
 
         void HandleOnGetGold(int gold)
         {
             Player.Gold += gold;
+            GameEvents.RequestSaveGame();
         }
 
         void HandleOnGetLoot(List<LootResult> lootResults)

@@ -92,6 +92,7 @@ namespace Arena.Shop
         {
             // Clear our bazaar once we enter a dungeon room
             CurrentBazaarItems.Clear();
+            GameEvents.RequestSaveGame();
         }
 
         void ShowItemSelectionView(bool isShown)
@@ -164,6 +165,7 @@ namespace Arena.Shop
                     if (CurrentBazaarItems.Count == 0)
                     {
                         CurrentBazaarItems = ItemSystem.Instance.GetBazaarShopItems(ItemCountInBazaar, PlayerSystem.Instance.Player.Level + 5);
+                        GameEvents.RequestSaveGame();
                     }
                     CurrentBuyableItems = CurrentBazaarItems;
                     break;

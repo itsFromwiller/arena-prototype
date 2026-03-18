@@ -39,24 +39,18 @@ namespace Arena.Dungeon
         private void OnEnable()
         {
             GameEvents.OnEnterDungeon += OnEnterDungeon;
+            GameEvents.OnSaveInitiated += OnSaveInitiated;
         }
 
         private void OnDisable()
         {
             GameEvents.OnEnterDungeon -= OnEnterDungeon;
+            GameEvents.OnSaveInitiated -= OnSaveInitiated;
         }
 
-        private void OnApplicationQuit()
+        private void OnSaveInitiated()
         {
             SaveDungeon();
-        }
-
-        private void OnApplicationFocus(bool focus)
-        {
-            if (!focus)
-            {
-                SaveDungeon();
-            }
         }
 
         public void SaveDungeon()

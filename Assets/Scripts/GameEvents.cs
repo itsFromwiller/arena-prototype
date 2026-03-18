@@ -7,10 +7,12 @@ using System.Collections.Generic;
 
 public class GameEvents
 {
-//    public static Action<string, int, bool> OnDealDamage;
-//    public static Action<string, bool> OnMiss;
-//    public static Action<string, int, bool> OnHeal;
-//    public static Action<string, bool> OnKilled;
+    //    public static Action<string, int, bool> OnDealDamage;
+    //    public static Action<string, bool> OnMiss;
+    //    public static Action<string, int, bool> OnHeal;
+    //    public static Action<string, bool> OnKilled;
+    public static Action OnSaveRequested;
+    public static Action OnSaveInitiated;
     public static Action<int> OnGetGold;
     public static Action<List<LootResult>> OnGetLoot;
     public static Action<int> OnGetXP;
@@ -59,6 +61,16 @@ public class GameEvents
     public static Action<CombatContext> OnEnemyKilled;
     public static Action<CombatContext> OnEnemyBuffStarted;
     public static Action OnEndCombat;
+    
+    public static void SaveGame()
+    {
+        OnSaveInitiated?.Invoke();
+    }
+
+    public static void RequestSaveGame()
+    {
+        OnSaveRequested?.Invoke();
+    }
 
     public static void GetGold(int amount)
     {

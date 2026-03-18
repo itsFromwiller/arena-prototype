@@ -24,6 +24,8 @@ public class AppSystem : MonoBehaviour
     public Button CreatePlayerButton;
     public GameObject TitleViewLoadingText;
 
+    private bool SaveRequested = false;
+
     private void Awake()
     {
         Instance = this;
@@ -32,6 +34,8 @@ public class AppSystem : MonoBehaviour
         NewCharacterView.SafeSetActive(false);
         GameView.SafeSetActive(false);
         TitleView.SafeSetActive(true);
+
+        GameEvents.OnSaveRequested += OnSaveRequested;
     }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -73,6 +77,20 @@ public class AppSystem : MonoBehaviour
             ContinueGameView.SafeSetActive(false);
             NewCharacterView.SafeSetActive(true);
             CreatePlayerButton.interactable = false;
+        }
+    }
+
+    private void OnSaveRequested()
+    {
+        SaveRequested = true;
+    }
+
+    private void FixedUpdate()
+    {
+        if (SaveRequested)
+        {
+            SaveRequested = false;
+            GameEvents.SaveGame();
         }
     }
 

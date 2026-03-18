@@ -25,6 +25,7 @@ namespace Arena.Town
         {
             // Populate town
             TownView.SafeSetActive(true);
+            GameEvents.RequestSaveGame();
         }
 
         public void SelectInnButton()

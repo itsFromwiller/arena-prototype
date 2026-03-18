@@ -128,6 +128,7 @@ namespace Arena.Player
             if (!HasUnlockedDungeon(dungeonName))
             {
                 DungeonsUnlocked.Add(dungeonName);
+                GameEvents.RequestSaveGame();
             }
         }
 
@@ -146,6 +147,7 @@ namespace Arena.Player
             }
             ActiveRequests.Add(requestData.Id);
             ActiveRequestData.Add(requestData);
+            GameEvents.RequestSaveGame();
         }
 
         public bool HasRequest(string requestDataId)
@@ -219,6 +221,7 @@ namespace Arena.Player
             }
             ActiveRequests.Remove(requestData.Id);
             ActiveRequestData.Remove(requestData);
+            GameEvents.RequestSaveGame();
         }
 
         public void LearnSkill(string skillName)
@@ -234,6 +237,7 @@ namespace Arena.Player
             SkillData skillData = SkillSystem.Instance.GetSkillData(skillName);
             var skillDataSlot = new SkillDataSlot(skillData, true);
             SkillSlots.Add(skillDataSlot);
+            GameEvents.RequestSaveGame();
         }
 
         public void GetTempSkill(string skillName)
@@ -250,6 +254,7 @@ namespace Arena.Player
             SkillData skillData = SkillSystem.Instance.GetSkillData(skillName);
             var skillDataSlot = new SkillDataSlot(skillData, false);
             SkillSlots.Add(skillDataSlot);
+            GameEvents.RequestSaveGame();
         }
 
         public void RemoveTempSkill(string skillName)
@@ -272,6 +277,7 @@ namespace Arena.Player
             {
                 SkillSlots.RemoveAt(removeIndex);
             }
+            GameEvents.RequestSaveGame();
         }
 
         public List<SkillDataSlot> GetCurrentSkills()
@@ -432,6 +438,7 @@ namespace Arena.Player
                 StatPointsRemaining += 5;
                 GameEvents.PlayerLevelChanged(Level);
             }
+            GameEvents.RequestSaveGame();
         }
 
         public int GetMaxXPForLevel(int level)
@@ -471,6 +478,8 @@ namespace Arena.Player
 
         public void GainItem(string itemName, int count, string rarityModifier, string randomModifier)
         {
+            GameEvents.RequestSaveGame();
+
             ItemData itemData = ItemSystem.Instance.GetItemData(itemName);
             if (itemData == null)
             {
@@ -530,6 +539,8 @@ namespace Arena.Player
 
         public void UseItem(string itemName, int count)
         {
+            GameEvents.RequestSaveGame();
+
             for (int i = ItemSlots.Count - 1; i >= 0; --i)
             {
                 ItemDataSlot itemSlot = ItemSlots[i];
@@ -553,6 +564,8 @@ namespace Arena.Player
 
         public int SellItem(string itemName, int count, int itemID, double shopSalePercentage)
         {
+            GameEvents.RequestSaveGame();
+
             int soldGold = 0;
             for (int i = ItemSlots.Count - 1; i >= 0; --i)
             {
@@ -592,6 +605,7 @@ namespace Arena.Player
 
         public void UnequipSlot(SlotType slotType)
         {
+            GameEvents.RequestSaveGame();
             if (EquippedItems.Remove(slotType, out var itemDataSlot))
             {
                 ItemSlots.Add(itemDataSlot);
@@ -616,6 +630,8 @@ namespace Arena.Player
                 Debug.LogError("Item not found: " + itemName);
                 return;
             }
+
+            GameEvents.RequestSaveGame();
 
             // Remove the item we have equipped in that slot
             // If it's a two hand, remove both main hand and off hand
