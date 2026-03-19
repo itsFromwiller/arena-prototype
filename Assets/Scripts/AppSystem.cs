@@ -20,8 +20,12 @@ public class AppSystem : MonoBehaviour
     public GameObject TitleView;
     public GameObject ContinueGameView;
     public GameObject NewCharacterView;
+    public GameObject DialogueTextView;
+    public GameObject PickNameTextView;
+    public GameObject IntroTextView;
     public TMP_InputField NameField;
     public Button CreatePlayerButton;
+
     public GameObject TitleViewLoadingText;
 
     private bool SaveRequested = false;
@@ -34,6 +38,9 @@ public class AppSystem : MonoBehaviour
         NewCharacterView.SafeSetActive(false);
         GameView.SafeSetActive(false);
         TitleView.SafeSetActive(true);
+        DialogueTextView.SafeSetActive(true);
+        PickNameTextView.SafeSetActive(false);
+        IntroTextView.SafeSetActive(false);
 
         GameEvents.OnSaveRequested += OnSaveRequested;
     }

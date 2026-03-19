@@ -118,6 +118,7 @@ namespace Arena.Player
             Player = new PlayerEntity(name);
             Player.LearnSkill("Run Away");
             Player.GainItem("Weak Potion", 5, null, null);
+            Player.UnlockDungeon("Grasslands");
             Player.Init();
             GameEvents.RequestSaveGame();
         }
