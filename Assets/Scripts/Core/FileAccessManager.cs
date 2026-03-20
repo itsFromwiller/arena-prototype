@@ -32,7 +32,7 @@ namespace Arena.Core
         public static void Remove(string key)
         {
 #if UNITY_WEBGL && !UNITY_EDITOR
-            WebGLLocalStorage.LocalStorageManager.Remove(key, json);
+            WebGLLocalStorage.LocalStorageManager.Remove(key);
 #else
             string filePath = $"{Application.persistentDataPath}/{key}";
             if (File.Exists(filePath))
