@@ -131,16 +131,14 @@ namespace Arena.Player
                 return;
             }
             string json = JsonConvert.SerializeObject(Player);
-            string path = Application.persistentDataPath + "/player.json";
-            File.WriteAllText(path, json);
+            FileAccessManager.Save("player.json", json);
         }
 
         public PlayerEntity LoadPlayer()
         {
-            string path = Application.persistentDataPath + "/player.json";
-            if (File.Exists(path)) // Check if file exists
+            string json = FileAccessManager.Load("player.json");
+            if (!string.IsNullOrEmpty(json))
             {
-                string json = File.ReadAllText(path); // Load from file
 #if DEBUG_LOG
                 Debug.Log("Player Json: " + json);
 #endif

@@ -60,16 +60,14 @@ namespace Arena.Dungeon
                 return;
             }
             string json = JsonConvert.SerializeObject(DungeonEntity);
-            string path = Application.persistentDataPath + "/dungeon.json";
-            File.WriteAllText(path, json);
+            FileAccessManager.Save("dungeon.json", json);
         }
 
         public DungeonEntity LoadDungeon()
         {
-            string path = Application.persistentDataPath + "/dungeon.json";
-            if (File.Exists(path)) // Check if file exists
+            string json = FileAccessManager.Load("dungeon.json");
+            if (!string.IsNullOrEmpty(json))
             {
-                string json = File.ReadAllText(path); // Load from file
 #if DEBUG_LOG
                 Debug.Log("Dungeon Json: " + json);
 #endif

@@ -8,6 +8,8 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using UnityEngine.Networking;
+using WebGLLocalStorage;
+using Arena.Core;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -64,11 +66,10 @@ public class GoogleSheetDownloader : MonoBehaviour
         CachedData.Clear();
 
         // Load our cached data, if it exists
-        string cachedPath = Application.persistentDataPath + "/cachedData.json";
-        if (File.Exists(cachedPath))
-        {
-            string cachedJson = File.ReadAllText(cachedPath);
-            CachedData = JsonConvert.DeserializeObject<Dictionary<string, string>>(cachedJson);
+        string json = FileAccessManager.Load("cachedData.json");
+        if (!string.IsNullOrEmpty(json))
+        { 
+            CachedData = JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
         }
 
         // Grab our Updates data, if it exists
@@ -135,8 +136,8 @@ public class GoogleSheetDownloader : MonoBehaviour
         yield return new WaitUntil(() => activeDownloads == 0);
 
         // Save our data
-        string json = JsonConvert.SerializeObject(Data);
-        File.WriteAllText(cachedPath, json);
+        json = JsonConvert.SerializeObject(Data);
+        FileAccessManager.Save("cachedData.json", json);
 
         HasData = true;
     }
