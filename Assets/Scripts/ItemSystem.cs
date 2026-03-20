@@ -178,7 +178,7 @@ namespace Arena.Items
                     stat = itemDataSlot.GetCalculatedMAttack();
                     if (stat > 0)
                     {
-                        sb.Append($"<color=#0000FF>[MAtk +{stat}]</color> ");
+                        sb.Append($"<color=#00AAFF>[MAtk +{stat}]</color> ");
                     }
                     stat = itemDataSlot.GetCalculatedDefense();
                     if (stat > 0)
