@@ -737,6 +737,7 @@ namespace Arena.Combat
                 if (DungeonSystem.Instance.IsLastRoomOfFloor())
                 {
                     CombatContext.Player.ProcessActiveSkillLifetimes(SkillLifetime.Floors);
+                    // TODO: Show next floor UI
                 }
                 CombatActionsView.SafeSetActive(false);
                 AfterCombatContinueButton.SafeSetActive(true);
