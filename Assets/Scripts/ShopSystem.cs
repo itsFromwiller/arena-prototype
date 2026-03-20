@@ -18,6 +18,7 @@ namespace Arena.Shop
         public SelectionView SelectionView;
         public GameObject MainOptions;
         public GameObject BackButton;
+        public TextMeshProUGUI LeaveShopButtonText;
         public TextMeshProUGUI BackButtonText;
         public TextMeshProUGUI CurrentGold;
         public int ItemCountInBazaar = 10;
@@ -58,30 +59,35 @@ namespace Arena.Shop
                 {
                     ShopName.text = "Bazaar";
                     ShopInfo.text = "An ever-changing market where new <color=green>Uncommon</color> items appear after every dungeon run! All items can be sold, but for less than a specialty shop.";
+                    LeaveShopButtonText.text = "Leave Bazaar";
                     break;
                 }
                 case "Weapons":
                 {
                     ShopName.text = "Weapons Shop";
                     ShopInfo.text = "An essential shop where you are able to buy and sell weapons ideal for physical attacks.";
+                    LeaveShopButtonText.text = "Leave Shop";
                     break;
                 }
                 case "Armor":
                 {
                     ShopName.text = "Armor Shop";
                     ShopInfo.text = "A trusty shop where all manner of Armor and Shields can be bought and sold.";
+                    LeaveShopButtonText.text = "Leave Shop";
                     break;
                 }
                 case "Magic":
                 {
                     ShopName.text = "Magic Shop";
                     ShopInfo.text = "A wonderous shop where magical weapons, items, and books can be bought and sold.";
+                    LeaveShopButtonText.text = "Leave Shop";
                     break;
                 }
                 case "Items":
                 {
                     ShopName.text = "Item Shop";
                     ShopInfo.text = "A peculiar shop that buys and sells various consumable items. They also purchase random materials dropped in a dungeon.";
+                    LeaveShopButtonText.text = "Leave Shop";
                     break;
                 }
             }

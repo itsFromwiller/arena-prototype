@@ -2996,7 +2996,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4505489351202586244, guid: 192a055aa8478d24d8e84ac059896280, type: 3}
       propertyPath: m_text
-      value: Return to Town
+      value: Leave Inn
       objectReference: {fileID: 0}
     - target: {fileID: 4822082491977470831, guid: 192a055aa8478d24d8e84ac059896280, type: 3}
       propertyPath: m_Name
