@@ -30,7 +30,7 @@ namespace Arena.Player
         {
             get
             {
-                double result = Endurance * 2;
+                double result = Endurance * 5;
                 ModifyStatViaActiveSkills(ref result, SkillType.ModifyMaxHP);
                 return (int)result;
             }
@@ -39,7 +39,7 @@ namespace Arena.Player
         {
             get
             {
-                double result = Intelligence * 2;
+                double result = Intelligence * 5;
                 ModifyStatViaActiveSkills(ref result, SkillType.ModifyMaxMP);
                 return (int)result;
             }
